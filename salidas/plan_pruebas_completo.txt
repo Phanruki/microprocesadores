@@ -1,0 +1,223 @@
+Plan de pruebas del simulador MIPS
+
+== Pruebas unitarias ==
+=== PRUEBAS UNITARIAS - Simulador MIPS ===
+
+-- UnidadAlmacenamiento --
+  [PASS] ancho de palabra = 32 bits
+  [PASS] cantidad de celdas = 100
+  [PASS] lectura celda 0
+  [PASS] lectura celda 99
+  [PASS] escritura fuera de rango (100)
+  [PASS] lectura fuera de rango (-1)
+  [PASS] limpiar pone celda 0 a 0
+  [PASS] constructor rechaza celdas <= 0
+-- RAM / ROM --
+  [PASS] RAM ancho 32 bits
+  [PASS] RAM 100 celdas
+  [PASS] RAM escritura/lectura
+  [PASS] ROM ancho 32 bits
+  [PASS] ROM 100 celdas
+  [PASS] ROM bloqueada rechaza escritura
+  [PASS] ROM desbloqueada permite escritura
+  [PASS] cargarPrograma celda 0
+  [PASS] cargarPrograma celda 3
+  [PASS] ROM bloqueada tras cargarPrograma
+-- DiscoDuro --
+  [PASS] DiscoDuro ancho 32 bits
+  [PASS] DiscoDuro 100 celdas
+  [PASS] guardar/cargar celda 0
+  [PASS] guardar/cargar celda 1
+  [PASS] importar desde RAM
+  [PASS] exportar a RAM
+-- Registros --
+  [PASS] cantidad de registros = 32
+  [PASS] escritura/lectura $t0
+  [PASS] $zero siempre es 0
+  [PASS] indice de registro invalido
+  [PASS] limpiar registros
+-- Contador de programa --
+  [PASS] PC inicia en 0
+  [PASS] PC incrementa en 1 (siguiente instruccion)
+  [PASS] PC tras 3 incrementos
+  [PASS] PC set manual
+  [PASS] PC reiniciar
+  [PASS] ancho del PC = 32 bits
+-- ALU --
+  [PASS] ADD 2+3
+  [PASS] ADD negativos -5+(-3)
+  [PASS] ADD con desbordamiento detiene la ejecucion
+  [PASS] ADDU MAX+1 envuelve a MIN
+  [PASS] SUB 10-4
+  [PASS] SUB con desbordamiento detiene la ejecucion
+  [PASS] SUBU MIN-1 envuelve a MAX
+  [PASS] AND 0xF0 & 0x3C
+  [PASS] OR 0xF0 | 0x0F
+  [PASS] XOR 0xFF ^ 0x0F
+  [PASS] NOR 0 | 0 = ~0
+  [PASS] SLT 3 < 5
+  [PASS] SLT 5 < 3
+  [PASS] SLT -1 < 1
+  [PASS] SLTU -1 < 1 vale 0 (-1 es 4294967295 sin signo)
+  [PASS] SLTU 1 < -1 vale 1 (sin signo)
+  [PASS] SLL 1 << 4
+  [PASS] SRL 32 >>> 3
+-- Codificacion de instrucciones --
+  [PASS] opcode de R-type
+  [PASS] rs de add
+  [PASS] rt de add
+  [PASS] rd de add
+  [PASS] funct de add
+  [PASS] es tipo R
+  [PASS] funct de addu
+  [PASS] funct de subu
+  [PASS] funct de sltu
+  [PASS] opcode de addi
+  [PASS] inmediato de addi
+  [PASS] opcode de addiu
+  [PASS] extension de signo de -3
+  [PASS] opcode de sltiu
+  [PASS] opcode de j
+  [PASS] direccion de j
+  [PASS] funct de syscall
+-- ProgramaBuilder --
+  [PASS] 3 instrucciones generadas
+  [PASS] cargarConstante(42) usa addiu
+  [PASS] inmediato 42
+  [PASS] opcode de addu
+  [PASS] funct de addu
+  [PASS] constante de 32 bits ocupa lui + ori
+  [PASS] lui carga la parte alta
+  [PASS] ori carga la parte baja
+  [PASS] los datos empiezan en la celda 100
+  [PASS] segunda palabra
+  [PASS] la cadena ocupa 5 celdas (4 + nulo)
+  [PASS] direccion de la cadena
+  [PASS] lwAbs con direccion absoluta
+  [PASS] opcode de lw
+  [PASS] offset de bne hacia adelante
+  [PASS] opcode de bne
+  [PASS] direccion de j resuelta
+  [PASS] etiqueta sin definir al generar
+  [PASS] la ROM no admite mas de 100 instrucciones
+
+==================================================
+ RESUMEN PRUEBAS UNITARIAS
+ Pasadas: 89   Fallidas: 0
+==================================================
+
+== Pruebas de integracion ==
+=== PRUEBAS DE INTEGRACION - Simulador MIPS ===
+
+-- Integracion: carga en ROM --
+  [PASS] ROM tiene 5 instrucciones
+  [PASS] ROM bloqueada despues de cargar
+  [PASS] PC inicia en 0
+  [PASS] instruccion 0 en ROM == generada
+-- Integracion: aritmetica --
+  [PASS] $t0 = 10
+  [PASS] $t1 = 32
+  [PASS] $t2 = 10+32 = 42
+  [PASS] $t3 = 32-10 = 22
+  [PASS] programa detenido por syscall exit
+  [PASS] andi 0xFF & 0x0F = 0x0F
+  [PASS] ori
+  [PASS] xor 0x0F ^ 0xF0 = 0xFF
+-- Integracion: desbordamiento --
+  [PASS] addi con desbordamiento detiene la ejecucion
+  [PASS] addiu MAX+1 envuelve sin excepcion
+-- Integracion: ramas --
+  [PASS] slt 3<5 = 1
+  [PASS] beq no tomado: $t3 = 99
+  [PASS] bne tomado: $t3 = 55
+-- Integracion: bucle --
+  [PASS] suma 1..5 = 15
+  [PASS] ciclos ejecutados > 10
+-- Integracion: memoria de datos --
+  [PASS] lw lee val = 123
+  [PASS] sw escribe y lw relee = 123
+  [PASS] RAM[var] = 123
+  [PASS] arr[0] = 10
+  [PASS] arr[1] = 20
+  [PASS] arr[2] = 30
+  [PASS] suma arr = 60
+-- Integracion: syscall --
+  [PASS] salida de syscall = "Hola MIPS42"
+  [PASS] exit detiene la CPU
+-- Integracion: subrutina --
+  [PASS] subrutina doble(10) = 20
+  [PASS] $t9 = 20 tras retorno
+-- Integracion: mult/div --
+  [PASS] 7*6 = 42
+  [PASS] 7/6 cociente = 1
+  [PASS] 7%6 resto = 1
+  [PASS] LO = 1 tras div
+  [PASS] HI = 1 tras div
+
+==================================================
+ RESUMEN PRUEBAS DE INTEGRACION
+ Pasadas: 35   Fallidas: 0
+==================================================
+
+== Pruebas de sistema ==
+=== PRUEBAS DE SISTEMA - Simulador MIPS ===
+
+-- Sistema: sumatoria --
+  [PASS] sumatoria: se construye sin error
+  [PASS] sumatoria: cabe en la ROM (<=100 instrucciones)
+  [PASS] sumatoria: salida exacta
+-- Sistema: factorial --
+  [PASS] factorial: se construye sin error
+  [PASS] factorial: cabe en la ROM (<=100 instrucciones)
+  [PASS] factorial: salida exacta
+-- Sistema: integral --
+  [PASS] integral: se construye sin error
+  [PASS] integral: cabe en la ROM (<=100 instrucciones)
+  [PASS] integral: salida exacta
+-- Sistema: promedio --
+  [PASS] promedio: se construye sin error
+  [PASS] promedio: cabe en la ROM (<=100 instrucciones)
+  [PASS] promedio: salida exacta
+-- Sistema: perceptron --
+  [PASS] perceptron: se construye sin error
+  [PASS] perceptron: cabe en la ROM (<=100 instrucciones)
+  [PASS] perceptron: salida exacta
+-- Sistema: todos los programas finalizan --
+  [PASS] sumatoria: se construye sin error
+  [PASS] sumatoria: cabe en la ROM (<=100 instrucciones)
+Sumatoria de 3 a 10 = 52
+  [PASS] sumatoria: termina (detenido=true)
+  [PASS] sumatoria: ciclos razonables (<10000)
+  [PASS] sumatoria: termina con syscall exit (PC dentro de ROM)
+  [PASS] factorial: se construye sin error
+  [PASS] factorial: cabe en la ROM (<=100 instrucciones)
+Factorial de 7 = 5040
+  [PASS] factorial: termina (detenido=true)
+  [PASS] factorial: ciclos razonables (<10000)
+  [PASS] factorial: termina con syscall exit (PC dentro de ROM)
+  [PASS] integral: se construye sin error
+  [PASS] integral: cabe en la ROM (<=100 instrucciones)
+Integral de x^2 dx desde x=1 hasta x=5 = 30
+  [PASS] integral: termina (detenido=true)
+  [PASS] integral: ciclos razonables (<10000)
+  [PASS] integral: termina con syscall exit (PC dentro de ROM)
+  [PASS] promedio: se construye sin error
+  [PASS] promedio: cabe en la ROM (<=100 instrucciones)
+Vector: 4 8 15 16 23 
+Promedio = 13
+  [PASS] promedio: termina (detenido=true)
+  [PASS] promedio: ciclos razonables (<10000)
+  [PASS] promedio: termina con syscall exit (PC dentro de ROM)
+  [PASS] perceptron: se construye sin error
+  [PASS] perceptron: cabe en la ROM (<=100 instrucciones)
+z = 3  y = 1
+  [PASS] perceptron: termina (detenido=true)
+  [PASS] perceptron: ciclos razonables (<10000)
+  [PASS] perceptron: termina con syscall exit (PC dentro de ROM)
+
+==================================================
+ RESUMEN PRUEBAS DE SISTEMA
+ Pasadas: 40   Fallidas: 0
+==================================================
+
+Resultado global: todas las pruebas pasaron

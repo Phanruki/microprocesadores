@@ -1,0 +1,411 @@
+package mips;
+
+import almacenamiento.Registros;
+
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
+import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+
+/**
+ * Ventana grafica del simulador del procesador MIPS (Practica 2).
+ *
+ * Campos:
+ *   - Instrucciones (Binario): entrada de instrucciones en binario (32 bits)
+ *   - Historial: ciclo, PC, instruccion, operacion y PC siguiente
+ *   - Registros: nombre = binario
+ *   - RAM: nombre (direccion) = binario
+ *   - Estado CPU: PC, HI y LO en binario
+ */
+public class VentanaSimulador extends JFrame {
+
+    private static final int LIMITE_CICLOS = 10000;
+
+    private final ProcesadorMIPS cpu = new ProcesadorMIPS();
+
+    private final JTextArea entrada = new JTextArea(4, 46);
+    private final JTextArea historial = new JTextArea();
+    private final JTextArea registros = new JTextArea();
+    private final JTextArea ram = new JTextArea();
+
+    private final JLabel valorPc = new JLabel();
+    private final JLabel valorHi = new JLabel();
+    private final JLabel valorLo = new JLabel();
+    private final JLabel barraEstado = new JLabel("Listo.");
+    private final JLabel barraCiclos = new JLabel();
+
+    private int limitePrograma;
+    private String ultimaCarga;
+
+    public VentanaSimulador() {
+        super("Simulador MIPS - Practica 2");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout(6, 6));
+        add(construirEntrada(), BorderLayout.NORTH);
+        add(construirPanelCentral(), BorderLayout.CENTER);
+        add(construirBarraEstado(), BorderLayout.SOUTH);
+
+        instalarAtajos();
+        reiniciarCpu();
+        estado("Listo - escriba instrucciones en binario (32 bits) y pulse "
+                + "\"Ejecutar 1 ciclo\" (Ctrl+Intro). Boton \"Cargar ejemplo\" para probar.");
+        setSize(1180, 760);
+        setMinimumSize(new Dimension(900, 600));
+        setLocationRelativeTo(null);
+    }
+
+    // ------------------------------------------------------------------
+    // Construccion de la interfaz
+    // ------------------------------------------------------------------
+
+    private JPanel construirEntrada() {
+        JPanel panel = new JPanel(new BorderLayout(6, 6));
+        panel.setBorder(new CompoundBorder(
+                new EmptyBorder(6, 6, 0, 6),
+                BorderFactory.createTitledBorder("Instrucciones (Binario)")));
+
+        entrada.setFont(fuente());
+        entrada.setLineWrap(true);
+        entrada.setWrapStyleWord(false);
+        JScrollPane scroll = new JScrollPane(entrada);
+        panel.add(scroll, BorderLayout.CENTER);
+
+        JPanel botones = new JPanel();
+        botones.setLayout(new BoxLayout(botones, BoxLayout.Y_AXIS));
+        botones.add(boton("Ejecutar 1 ciclo", e -> ejecutarCiclos(1)));
+        botones.add(Box.createVerticalStrut(4));
+        botones.add(boton("Ejecutar programa", e -> ejecutarCiclos(LIMITE_CICLOS)));
+        botones.add(Box.createVerticalStrut(4));
+        botones.add(boton("Cargar en el PC", e -> cargarInstrucciones()));
+        botones.add(Box.createVerticalStrut(4));
+        botones.add(boton("Cargar ejemplo", e -> cargarEjemplo()));
+        botones.add(Box.createVerticalStrut(4));
+        botones.add(boton("Reiniciar CPU", e -> reiniciarCpu()));
+        botones.add(Box.createVerticalStrut(4));
+        botones.add(boton("Limpiar historial", e -> historial.setText("")));
+        panel.add(botones, BorderLayout.EAST);
+        return panel;
+    }
+
+    private JSplitPane construirPanelCentral() {
+        JScrollPane scHistorial = conTitulo(historial, "Historial");
+        JScrollPane scRegistros = conTitulo(registros, "Registros");
+        JScrollPane scRam = conTitulo(ram, "RAM");
+
+        JSplitPane superior = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, scHistorial, scRegistros);
+        superior.setResizeWeight(0.5);
+        superior.setContinuousLayout(true);
+
+        JSplitPane inferior = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, scRam, construirCpu());
+        inferior.setResizeWeight(0.55);
+        inferior.setContinuousLayout(true);
+
+        JSplitPane raiz = new JSplitPane(JSplitPane.VERTICAL_SPLIT, superior, inferior);
+        raiz.setResizeWeight(0.62);
+        raiz.setContinuousLayout(true);
+        raiz.setBorder(null);
+        return raiz;
+    }
+
+    private JPanel construirCpu() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createTitledBorder("Estado CPU"));
+
+        JPanel rejilla = new JPanel(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.WEST;
+        c.insets = new Insets(4, 10, 4, 10);
+
+        String[] etiquetas = {"PC:", "HI:", "LO:"};
+        JLabel[] valores = {valorPc, valorHi, valorLo};
+        for (int i = 0; i < etiquetas.length; i++) {
+            c.gridx = 0;
+            c.gridy = i;
+            JLabel etiqueta = new JLabel(etiquetas[i]);
+            etiqueta.setFont(fuente().deriveFont(Font.BOLD));
+            rejilla.add(etiqueta, c);
+
+            c.gridx = 1;
+            valores[i].setFont(fuente());
+            rejilla.add(valores[i], c);
+        }
+        panel.add(rejilla, BorderLayout.NORTH);
+        return panel;
+    }
+
+    private JPanel construirBarraEstado() {
+        JPanel panel = new JPanel(new BorderLayout(8, 0));
+        panel.setBorder(new CompoundBorder(
+                BorderFactory.createEtchedBorder(),
+                new EmptyBorder(4, 8, 4, 8)));
+        barraEstado.setFont(fuente());
+        barraEstado.setForeground(new Color(0x1B5E20));
+        barraCiclos.setFont(fuente());
+        panel.add(barraEstado, BorderLayout.CENTER);
+        panel.add(barraCiclos, BorderLayout.EAST);
+        return panel;
+    }
+
+    private JScrollPane conTitulo(JTextArea area, String titulo) {
+        area.setEditable(false);
+        area.setFont(fuente());
+        JScrollPane scroll = new JScrollPane(area);
+        scroll.setBorder(BorderFactory.createTitledBorder(titulo));
+        return scroll;
+    }
+
+    private JButton boton(String texto, java.awt.event.ActionListener accion) {
+        JButton boton = new JButton(texto);
+        boton.setAlignmentX(Component.LEFT_ALIGNMENT);
+        boton.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        boton.addActionListener(accion);
+        return boton;
+    }
+
+    private void instalarAtajos() {
+        atajo(entrada, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_DOWN_MASK),
+                "unCiclo", e -> ejecutarCiclos(1));
+        atajo(entrada, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,
+                        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK),
+                "todoCiclos", e -> ejecutarCiclos(LIMITE_CICLOS));
+    }
+
+    private void atajo(JTextArea area, KeyStroke tecla, String nombre, java.awt.event.ActionListener accion) {
+        area.getInputMap(JTextArea.WHEN_FOCUSED).put(tecla, nombre);
+        area.getActionMap().put(nombre, new javax.swing.AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                accion.actionPerformed(e);
+            }
+        });
+    }
+
+    private static Font fuente() {
+        return new Font(Font.MONOSPACED, Font.PLAIN, 13);
+    }
+
+    // ------------------------------------------------------------------
+    // Ejecucion
+    // ------------------------------------------------------------------
+
+    private void ejecutarCiclos(int maxCiclos) {
+        int[] palabras;
+        try {
+            palabras = Binario.parsear(entrada.getText());
+        } catch (IllegalArgumentException ex) {
+            error(ex.getMessage());
+            return;
+        }
+
+        // Solo se vuelve a escribir en la ROM si el usuario cambio el texto;
+        // asi, pulsar varias veces "Ejecutar 1 ciclo" avanza de verdad.
+        if (palabras.length > 0 && !entrada.getText().equals(ultimaCarga)) {
+            if (!cargarEnRom(palabras)) {
+                return;
+            }
+            ultimaCarga = entrada.getText();
+        }
+
+        int limite = Math.max(cpu.longitudPrograma(), limitePrograma);
+        int ejecutados = 0;
+        String motivo = null;
+
+        while (!cpu.isDetenido() && ejecutados < maxCiclos) {
+            int pcActual = cpu.getPc().get();
+            if (pcActual < 0 || pcActual >= cpu.getRom().getCantidadCeldas()) {
+                motivo = "PC fuera de la ROM (" + pcActual + ")";
+                break;
+            }
+            int instruccion = cpu.getRom().leer(pcActual);
+            if (instruccion == 0 && pcActual >= limite) {
+                motivo = "final del programa";
+                break;
+            }
+
+            long ciclo = cpu.getCiclos() + 1;
+            String ensamblador = Desensamblador.mnemonico(instruccion, pcActual);
+            String operacion = Desensamblador.operacion(instruccion, pcActual, cpu);
+            String binario = Binario.a32(instruccion);
+
+            try {
+                cpu.ciclo();
+            } catch (RuntimeException ex) {
+                registrar(ciclo, pcActual, binario, ensamblador,
+                        "ERROR: " + ex.getMessage(), cpu.getPc().get());
+                estado("Ciclo " + ciclo + " - ERROR: " + ex.getMessage());
+                actualizar();
+                return;
+            }
+            registrar(ciclo, pcActual, binario, ensamblador, operacion, cpu.getPc().get());
+            ejecutados++;
+        }
+
+        if (motivo == null && cpu.isDetenido()) {
+            motivo = "CPU detenida (syscall exit)";
+        } else if (motivo == null && ejecutados >= maxCiclos && maxCiclos == LIMITE_CICLOS) {
+            motivo = "limite de " + LIMITE_CICLOS + " ciclos alcanzado";
+        }
+
+        actualizar();
+        StringBuilder mensaje = new StringBuilder();
+        mensaje.append("Ejecutado(s) ").append(ejecutados).append(" ciclo(s)");
+        if (motivo != null) {
+            mensaje.append(" - ").append(motivo);
+        }
+        String salida = cpu.obtenerConsola();
+        if (!salida.isEmpty()) {
+            mensaje.append(" | Salida: ").append(salida.replace('\n', ' '));
+        }
+        estado(mensaje.toString());
+    }
+
+    private void cargarInstrucciones() {
+        int[] palabras;
+        try {
+            palabras = Binario.parsear(entrada.getText());
+        } catch (IllegalArgumentException ex) {
+            error(ex.getMessage());
+            return;
+        }
+        if (palabras.length == 0) {
+            error("No hay instrucciones que cargar");
+            return;
+        }
+        if (cargarEnRom(palabras)) {
+            ultimaCarga = entrada.getText();
+            estado("Cargadas " + palabras.length + " instruccion(es) en la ROM desde la direccion "
+                    + (cpu.getPc().get()));
+            actualizar();
+        }
+    }
+
+    private boolean cargarEnRom(int[] palabras) {
+        int direccion = cpu.getPc().get();
+        if (direccion + palabras.length > cpu.getRom().getCantidadCeldas()) {
+            error("Las instrucciones no caben en la ROM desde la direccion " + direccion);
+            return false;
+        }
+        cpu.getRom().cargarPrograma(palabras, direccion);
+        limitePrograma = Math.max(limitePrograma, direccion + palabras.length);
+        return true;
+    }
+
+    private void registrar(long ciclo, int pc, String binario, String ensamblador,
+                           String operacion, int pcSiguiente) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Ciclo: ").append(ciclo).append('\n');
+        sb.append("PC: ").append(Binario.a32(pc)).append('\n');
+        sb.append("Instruccion: ").append(ensamblador).append('\n');
+        sb.append("Binario: ").append(binario).append('\n');
+        sb.append("Operacion: ").append(operacion).append('\n');
+        sb.append("PC Siguiente: ").append(Binario.a32(pcSiguiente)).append('\n');
+        sb.append("--------------------------------------------------\n");
+        historial.append(sb.toString());
+        historial.setCaretPosition(historial.getDocument().getLength());
+    }
+
+    private void reiniciarCpu() {
+        cpu.reiniciar();
+        limitePrograma = 0;
+        ultimaCarga = null;
+        historial.setText("");
+        actualizar();
+        estado("CPU reiniciada: ROM, RAM, registros, PC, HI y LO a cero");
+    }
+
+    private void cargarEjemplo() {
+        int[] ejemplo = {
+            Instruccion.codificarI(Instruccion.OP_ADDI, 0, 8, 10),
+            Instruccion.codificarI(Instruccion.OP_ADDI, 0, 9, 3),
+            Instruccion.codificarR(Instruccion.OP_R, 8, 9, 10, 0, Instruccion.FUNCT_ADD),
+            Instruccion.codificarI(Instruccion.OP_SW, 0, 10, MemoriaSistema.BASE_RAM),
+            Instruccion.codificarI(Instruccion.OP_LW, 0, 11, MemoriaSistema.BASE_RAM)
+        };
+        String[] comentarios = {
+            "addi $t0, $zero, 10",
+            "addi $t1, $zero, 3",
+            "add $t2, $t0, $t1",
+            "sw $t2, 100($zero)",
+            "lw $t3, 100($zero)"
+        };
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < ejemplo.length; i++) {
+            sb.append(Binario.a32(ejemplo[i])).append("   # ").append(comentarios[i]).append('\n');
+        }
+        entrada.setText(sb.toString());
+        entrada.setCaretPosition(0);
+        estado("Ejemplo cargado en el campo de instrucciones");
+    }
+
+    private void actualizar() {
+        StringBuilder sb = new StringBuilder(Registros.CANTIDAD * 46);
+        for (int i = 0; i < Registros.CANTIDAD; i++) {
+            sb.append(String.format("%-5s = %s%n", Registros.nombre(i), Binario.a32(cpu.getRegistros().leer(i))));
+        }
+        registros.setText(sb.toString());
+        registros.setCaretPosition(0);
+
+        int[] celdas = cpu.getRam().obtenerCeldas();
+        StringBuilder rb = new StringBuilder(celdas.length * 52);
+        for (int i = 0; i < celdas.length; i++) {
+            rb.append(String.format("RAM[%d] (%d) = %s%n",
+                    i, MemoriaSistema.BASE_RAM + i, Binario.a32(celdas[i])));
+        }
+        ram.setText(rb.toString());
+        ram.setCaretPosition(0);
+
+        valorPc.setText(Binario.a32(cpu.getPc().get()));
+        valorHi.setText(Binario.a32((int) cpu.getHi()));
+        valorLo.setText(Binario.a32((int) cpu.getLo()));
+        barraCiclos.setText("Ciclos: " + cpu.getCiclos());
+    }
+
+    private void estado(String mensaje) {
+        barraEstado.setText(mensaje);
+        barraEstado.setToolTipText(mensaje);
+    }
+
+    private void error(String mensaje) {
+        estado("ERROR: " + mensaje);
+        JOptionPane.showMessageDialog(this, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    // ------------------------------------------------------------------
+    // Arranque
+    // ------------------------------------------------------------------
+
+    public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception ignored) {
+            // se conserva el look and feel por defecto
+        }
+        SwingUtilities.invokeLater(() -> {
+            VentanaSimulador ventana = new VentanaSimulador();
+            ventana.setVisible(true);
+        });
+    }
+}
