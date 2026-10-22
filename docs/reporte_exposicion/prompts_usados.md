@@ -124,17 +124,12 @@ emulador muestra `Factorial de 7 = 5040` (63 ciclos).
 **Resultado**: `src/alu/ALU.java` y `src/alu/OperacionALU.java` (13 operaciones
 + NOP), probadas con las pruebas unitarias de la ALU.
 
-### Prompt 11 — José de Jesús (disco duro)
+> **Nota:** el prompt original sobre `DiscoDuro` (copiar la unidad de
+> almacenamiento y agregar persistencia en archivo) **no se incluye en el
+> reporte**: el equipo decidió declarar sólo los prompts cuyas capturas se
+> conservan y se entregan como evidencia.
 
-> «Crear una copia de la clase "unidad de almacenamiento" y llamarla
-> "DiscoDuro". Ajustar el ancho de palabra a 32 bits y la cantidad de celdas de
-> almacenamiento a 100. Además, agrega métodos para guardar y cargar su
-> contenido en un archivo.»
-
-**Resultado**: `src/memoria/DiscoDuro.java`, que hereda de
-`UnidadAlmacenamiento` y persiste sus 100 celdas en un archivo.
-
-### Prompt 12 — Miguel (ventana gráfica del emulador)
+### Prompt 11 — Miguel (ventana gráfica del emulador)
 
 > «Genera una ventana en Java (Swing) para mi emulador del procesador MIPS con
 > estos campos: instrucciones en binario (32 bits por línea, acepta hexadecimal
@@ -146,7 +141,7 @@ emulador muestra `Factorial de 7 = 5040` (63 ciclos).
 **Resultado**: `src/ui/VentanaEmulador.java`, usada para observar el estado de
 la CPU ciclo a ciclo.
 
-### Prompt 13 — José de Jesús (documentación del conjunto de instrucciones)
+### Prompt 12 — José de Jesús (documentación del conjunto de instrucciones)
 
 > «Genera la documentación del conjunto de instrucciones del procesador MIPS
 > que soporta mi emulador: formato R con su campo funct, formato I con su
@@ -156,7 +151,7 @@ la CPU ciclo a ciclo.
 **Resultado**: `docs/instrucciones.md`, referencia para escribir y revisar los
 cinco programas de usuario.
 
-### Prompt 14 — Equipo (reestructuración final a 5 paquetes)
+### Prompt 13 — Equipo (reestructuración final a 5 paquetes)
 
 > «Reorganiza el emulador en 5 paquetes grandes (cpu, ejecucion, memoria, alu,
 > instruccion) al estilo del diagrama del compañero, con la memoria segmentada

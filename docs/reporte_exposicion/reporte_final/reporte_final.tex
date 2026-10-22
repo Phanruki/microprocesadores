@@ -1,0 +1,810 @@
+% !TeX program = xelatex
+% =============================================================
+%  Reporte final — Práctica 2: Emulador básico de un procesador
+%  Copia modificada de docs/practica/final/plantillas/Reporte_LaTeX/main.tex
+%  (mismo estilo UV: colores, tipografía, encabezados, pies).
+%
+%  Compilar:  xelatex reporte_final.tex   (2 veces, para el índice)
+%  En Linux sin TeX instalado: subir la carpeta a Overleaf y compilar
+%  con XeLaTeX. Las imágenes viven en imagenes/.
+%
+%  NOTA: la portada y la anteportada de la plantilla UV se agregan
+%  después desde el editor (las tiene el equipo en PDF).
+% =============================================================
+\documentclass[11pt,letterpaper,oneside]{article}
+
+% ---------- Codificación e idioma ----------
+% inputenc y fontenc NO se usan con XeLaTeX (maneja UTF-8 de forma nativa)
+\usepackage[spanish,es-tabla]{babel}
+
+% ---------- Tipografía estilo plantilla UV ----------
+\usepackage{mathptmx}                 % Times-like body text
+\usepackage[scaled=0.92]{helvet}      % Helvetica-like (sustituye Gill Sans en títulos)
+
+% ---------- Geometría (acorde a la plantilla UV) ----------
+\usepackage[
+  letterpaper,
+  top=2.5cm,
+  bottom=2.5cm,
+  left=3cm,
+  right=2.5cm,
+  headheight=15pt
+]{geometry}
+
+% ---------- Interlineado 21 pts ≈ 1.5 ----------
+\usepackage{setspace}
+\setstretch{1.4}
+
+% ---------- Paquetes auxiliares ----------
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{float}
+
+% ---------- Colores institucionales (azul y verde UV) ----------
+\definecolor{uvblue}{RGB}{30,89,150}
+\definecolor{uvgreen}{RGB}{80,165,86}
+\definecolor{uvgray}{RGB}{90,90,90}
+\definecolor{lightbg}{RGB}{245,247,250}
+
+% ---------- Hipervínculos ----------
+\hypersetup{
+  colorlinks=true,
+  linkcolor=uvblue,
+  citecolor=uvblue,
+  urlcolor=uvblue,
+  pdftitle={Práctica 2: Emulador básico de un procesador},
+  pdfauthor={Yadid A. Soto Hernández, José de J. Berman Islas, Miguel A. Damián Bumas — Universidad Veracruzana}
+}
+
+% ---------- Estilo de títulos (Gill Sans-like + uvblue) ----------
+\titleformat{\section}
+  {\sffamily\Large\bfseries\color{uvblue}}
+  {\thesection.}{0.6em}{}
+\titleformat{\subsection}
+  {\sffamily\large\bfseries\color{uvblue!85!black}}
+  {\thesubsection}{0.5em}{}
+\titleformat{\subsubsection}
+  {\sffamily\normalsize\bfseries\color{uvgray}}
+  {\thesubsubsection}{0.4em}{}
+\titlespacing*{\section}{0pt}{1.6em}{0.8em}
+\titlespacing*{\subsection}{0pt}{1.2em}{0.5em}
+\titlespacing*{\subsubsection}{0pt}{0.9em}{0.4em}
+
+% ---------- Encabezado y pie de página estilo UV ----------
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\fancyfoot[L]{\footnotesize\color{uvgray}\itshape ``Lis de Veracruz: Arte, Ciencia, Luz''}
+\fancyfoot[R]{\footnotesize\color{uvblue}\textbf{www.uv.mx}}
+\fancyfoot[C]{\footnotesize\color{uvgray}\thepage}
+
+% ---------- Cajas de información ----------
+\newtcolorbox{infobox}[1][]{
+  colback=lightbg,
+  colframe=uvblue,
+  boxrule=0.4pt,
+  arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,
+  fonttitle=\sffamily\bfseries\color{white},
+  coltitle=white,
+  colbacktitle=uvblue,
+  #1
+}
+
+\newtcolorbox{requisito}[1][]{
+  enhanced,
+  colback=lightbg,
+  colframe=uvgreen!75!black,
+  boxrule=0.4pt,
+  arc=2pt,
+  left=6pt,right=6pt,top=4pt,bottom=4pt,
+  #1
+}
+
+% ---------- Listings para código ----------
+\lstset{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{uvblue}\bfseries,
+  commentstyle=\color{uvgreen!60!black}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{uvgray},
+  numbersep=8pt,
+  frame=single,
+  framerule=0.3pt,
+  rulecolor=\color{uvgray!40},
+  backgroundcolor=\color{lightbg},
+  breaklines=true,
+  breakatwhitespace=true,
+  showstringspaces=false,
+  tabsize=2,
+  captionpos=b,
+  xleftmargin=12pt,
+  xrightmargin=4pt,
+  aboveskip=10pt,
+  belowskip=10pt
+}
+
+% ---------- Pie de figura ----------
+\captionsetup{font=small,labelfont={bf,sf,color=uvblue},labelsep=period,
+              format=plain,justification=centering}
+
+% ---------- Comando: figura centrada con marco ----------
+\newcommand{\figura}[3][0.85\textwidth]{%
+  \begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=#1]{#2}}
+    \caption{#3}
+  \end{figure}
+}
+
+% ---------- Comando: figura SIN marco (capturas oscuras) ----------
+\newcommand{\captura}[3][0.8\textwidth]{%
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=#1]{#2}
+    \caption{#3}
+  \end{figure}
+}
+
+% ---------- Comando: ruta/archivo en monoespaciada con quiebres ----------
+\usepackage{seqsplit}
+\newcommand{\ruta}[1]{\texttt{\seqsplit{#1}}}
+
+% =============================================================
+%                          DOCUMENTO
+% =============================================================
+\begin{document}
+
+% -------------------------------------------------------------
+% PORTADA Y ANTEPORTADA: se agregan aquí desde el editor.
+% El equipo las tiene en PDF de la plantilla UV.
+% -------------------------------------------------------------
+
+% ============== ÍNDICE ==============
+\pagenumbering{roman}
+\setcounter{page}{2}
+{\sffamily
+  \renewcommand{\contentsname}{\color{uvblue}\Large\bfseries Índice}
+  \tableofcontents
+}
+\newpage
+
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+% =============================================================
+%                       1. INTRODUCCIÓN
+% =============================================================
+\section{Introducción}
+
+Los procesadores que dan vida a los dispositivos que usamos a diario se
+perciben como una caja negra: se sabe que ejecutan instrucciones, pero rara vez
+se tiene la oportunidad de construir uno para observar qué ocurre realmente
+dentro. En esta práctica desarrollamos, desde cero, un \textbf{emulador del
+procesador MIPS} en Java, con la intención de sustituir la memorización de
+conceptos por la experiencia de implementarlos.
+
+\subsection{¿Por qué construir un emulador de procesador desde cero?}
+
+Un procesador comercial real no puede estudiarse pieza por pieza: contiene
+millones de transistores, su diseño es propiedad industrial y se construye en
+equipos grandes a lo largo de años. Diseñar el nuestro desde cero nos permitió
+tomar y ver cada una de las decisiones que en un chip comercial vienen ya
+tomadas: el ancho de palabra, el mapa de direcciones, el conjunto de
+instrucciones, el manejo de los desbordamientos y la forma en que se actualiza
+el contador de programa.
+
+Además, implementar el ciclo de instrucción (búsqueda, decodificación,
+ejecución, memoria y escritura) desmitifica el hardware: cada instrucción que
+escribe un programador en un lenguaje de alto nivel termina, al final, en
+operaciones de la ALU y en movimientos de datos entre registros y memoria. Y
+algo importante desde el punto de vista didáctico: en un procesador real un
+error cuesta silicio, mientras que en un emulador un error es una prueba
+fallida que se puede corregir, repetir y documentar.
+
+\subsection{Qué gana un alumno al saber implementar un emulador de un procesador real}
+
+Quien ha construido un emulador deja de ver la arquitectura de computadoras
+como una asignatura de memorización y la entiende como un sistema que se puede
+razonar: sabe qué registros intervienen en una suma, qué significa que un dato
+desborde y por qué un bucle consume más ciclos que otro. En lo práctico,
+adquiere programación de bajo nivel (manejo de bits, registros, memoria y
+aritmética con y sin signo), capacidad de leer documentación técnica y
+traducirla a código, y disciplina de ingeniería de software: diseño modular,
+pruebas unitarias, pruebas de integración y pruebas de sistema.
+
+A esto se suma una ventaja profesional cada vez más valorada: la capacidad de
+usar la inteligencia artificial generativa con criterio, es decir, de pedirle
+apoyo a la herramienta y de comprobar después que lo que ésta devuelve es
+correcto.
+
+\subsection{Razón de implementar un emulador para el procesador MIPS}
+
+Elegimos MIPS de entre las opciones disponibles (RISC-V, x86, M1 y AMD) por
+varias razones. Primero, es una arquitectura \textbf{RISC} con sólo \textbf{tres
+formatos de instrucción fijos} (R, I y J), de modo que la codificación de 32
+bits es regular y predecible, lo que la hace factible de implementar en un curso
+sin sacrificar rigor. Segundo, es el procesador de referencia en la literatura
+de arquitectura de computadoras (por ejemplo, en los libros de Patterson y
+Hennessy), por lo que existe abundante material para resolver dudas. Tercero, su
+flujo de control es transparente: el PC se incrementa en una palabra por cada
+instrucción y las ramas se calculan con desplazamientos relativos, lo que permite
+observar con claridad cómo se modifica el flujo de un programa. Por último, sus
+servicios de sistema (\texttt{syscall}) permiten resolver la entrada y salida de
+datos sin necesidad de emular periféricos complejos.
+
+% =============================================================
+%                  2. DESARROLLO DE LA ACTIVIDAD
+% =============================================================
+\section{Desarrollo de la actividad}
+
+\subsection{Descripción del emulador}
+
+El emulador se implementó en Java con una arquitectura modular de \textbf{cinco
+paquetes grandes}, siguiendo el esqueleto del diagrama de clases que un
+compañero del equipo compartió como referencia:
+
+\begin{infobox}[title=Estructura del proyecto]
+\begin{lstlisting}[language=bash,caption={Estructura de carpetas del repositorio},captionpos=b]
+src/
+|-- cpu/          # CPU (ciclo de 5 etapas IF/ID/EX/MEM/WB) y PC
+|-- ejecucion/    # EjecutorInstrucciones, UnidadControl, SenalesControl
+|-- memoria/      # MemoriaSistema, UnidadAlmacenamiento, ROM, RAM,
+|                 # DiscoDuro y Registros
+|-- alu/          # ALU y enum OperacionALU (incluye LUI)
+|-- instruccion/  # Instruccion, Decodificador, Opcode, Funct,
+|                 # FormatoInstruccion, ServicioSyscall, ProgramaBuilder,
+|                 # Desensamblador, Binario
+|-- ui/           # Emulador (texto) y VentanaEmulador (Swing)
+|-- programas/    # Sumatoria, Factorial, Integral, Promedio, Perceptron
+`-- pruebas/      # MiniTest, PruebasUnitarias, PruebasIntegracion,
+                  # PruebasSistema, EjecutorPruebas
+\end{lstlisting}
+\end{infobox}
+
+La memoria está dividida en \textbf{segmentos con dirección}: la ROM guarda las
+instrucciones en las direcciones 0 a 99 y se bloquea una vez cargado el
+programa; la RAM guarda los datos del programa en las direcciones 100 a 199; y
+el DiscoDuro conserva información persistente en las direcciones 200 a 299.
+Todas las unidades trabajan con una \textbf{palabra de 32 bits} y \textbf{100
+celdas}.
+
+El procesador cuenta con \textbf{32 registros de 32 bits}, donde \texttt{\$zero}
+siempre lee cero e ignora las escrituras, y con un \textbf{contador de programa
+(PC) de 32 bits} que contiene la dirección de la siguiente instrucción a
+ejecutar: durante la búsqueda de instrucciones el PC se incrementa para apuntar
+a la siguiente, y las ramas (\texttt{beq}, \texttt{bne}, \texttt{j},
+\texttt{jal}, \texttt{jr}) escriben en él la dirección destino.
+
+Además, la \textbf{CPU nunca muere}: arranca en la dirección 0, el PC es
+\emph{circular} dentro del mapa de memoria, la celda 0 contiene un NOP y existe
+un límite de seguridad de 100\,000 ciclos; sólo se detiene con la instrucción
+propia \texttt{halt} (opcode \texttt{0x3F}) o con el servicio \texttt{syscall}
+10.
+
+\subsubsection{Procesador seleccionado y ALU}
+
+Se seleccionó el procesador \textbf{MIPS} [x] frente a RISC-V, x86, M1 y AMD.
+La ALU procesa 32 bits y soporta \textbf{trece operaciones}: ADD, ADDU, SUB,
+SUBU, AND, OR, XOR, NOR, SLT, SLTU, SLL, SRL y LUI, además de NOP. ADD y SUB
+detectan desbordamiento con signo y detienen la emulación; ADDU y SUBU envuelven
+el resultado sin avisar. MIPS no tiene registros de banderas, por lo que las
+comparaciones se hacen con \texttt{slt}/\texttt{slti}/\texttt{sltu} seguidas de
+\texttt{beq} o \texttt{bne}.
+
+\subsubsection{Ciclo de la CPU e instrucciones soportadas}
+
+Cada instrucción pasa por \textbf{cinco etapas}:
+
+\begin{requisito}
+\textbf{IF} (instrucción = ROM[PC]; PC = PC + 1) $\rightarrow$
+\textbf{ID} (separar opcode, rs, rt, rd, shamt, funct o inmediato y generar las
+señales de control) $\rightarrow$ \textbf{EX} (la ALU calcula) $\rightarrow$
+\textbf{MEM} (\texttt{lw} lee la memoria, \texttt{sw} la escribe) $\rightarrow$
+\textbf{WB} (el resultado llega al registro destino).
+\end{requisito}
+
+El conjunto soportado incluye las instrucciones de formato R (\texttt{add},
+\texttt{addu}, \texttt{sub}, \texttt{subu}, \texttt{and}, \texttt{or},
+\texttt{xor}, \texttt{nor}, \texttt{slt}, \texttt{sltu}, \texttt{sll},
+\texttt{srl}, \texttt{mult}, \texttt{div}, \texttt{mflo}, \texttt{mfhi},
+\texttt{jr}, \texttt{syscall}), de formato I (\texttt{addi}, \texttt{addiu},
+\texttt{andi}, \texttt{ori}, \texttt{xori}, \texttt{slti}, \texttt{sltiu},
+\texttt{lui}, \texttt{lw}, \texttt{sw}, \texttt{beq}, \texttt{bne}) y de formato
+J (\texttt{j}, \texttt{jal}), con cinco servicios de \texttt{syscall}: imprimir
+entero (1), imprimir cadena (4), leer entero (5), imprimir carácter (11) y
+terminar (10). Los programas de usuario se arman con \texttt{ProgramaBuilder},
+que emite las instrucciones y resuelve las etiquetas de las ramas, sin pasar
+por un archivo de texto ensamblado.
+
+\subsection{Evidencia de ejecución del código}
+
+Las pruebas técnicas se ejecutaron con la orden
+\texttt{java -cp out pruebas.EjecutorPruebas} y arrojaron \textbf{117 pruebas
+unitarias, 44 pruebas de integración y 40 pruebas de sistema}, todas pasadas y
+ninguna fallida. La primera tabla reúne la ejecución de los cinco programas de
+usuario y de las suites de pruebas; la segunda muestra la traza de la
+ejecución del programa factorial línea por línea, con el resultado que arrojó
+el emulador. De cada ejecución se capturó el estado al inicio y al final, que
+se muestran en las figuras siguientes.
+
+\begin{longtable}{@{}p{7.2cm} p{7.6cm}@{}}
+\caption{Ejecución de los programas de usuario (Paso 4) y de las suites de pruebas}\label{tab:comandos}\\
+\toprule
+\textbf{Línea de código a ejecutar} & \textbf{Resultado del emulador}\\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Línea de código a ejecutar} & \textbf{Resultado del emulador}\\
+\midrule
+\endhead
+\texttt{java -cp out ui.Emulador sumatoria}   & ``Sumatoria de 3 a 10 = 52'' (68 ciclos)\\
+\texttt{java -cp out ui.Emulador factorial}   & ``Factorial de 7 = 5040'' (63 ciclos)\\
+\texttt{java -cp out ui.Emulador integral}    & ``Integral de x\^{}2 dx desde x=1 hasta x=5 = 30'' (56 ciclos)\\
+\texttt{java -cp out ui.Emulador promedio}    & ``Vector: 4 8 15 16 23'' y ``Promedio = 13'' (123 ciclos)\\
+\texttt{java -cp out ui.Emulador perceptron}  & ``z = 3\ \ y = 1'' (62 ciclos)\\
+\texttt{java -cp out ui.Emulador factorial --traza --estado} & Traza por ciclo con el PC y el código en hexadecimal; volcado de registros y mapa de memoria\\
+\texttt{java -cp out pruebas.PruebasUnitarias}    & RESUMEN PRUEBAS UNITARIAS / Pasadas: 117\ \ Fallidas: 0\\
+\texttt{java -cp out pruebas.PruebasIntegracion}  & RESUMEN PRUEBAS DE INTEGRACION / Pasadas: 44\ \ Fallidas: 0\\
+\texttt{java -cp out pruebas.PruebasSistema}      & RESUMEN PRUEBAS DE SISTEMA / Pasadas: 40\ \ Fallidas: 0\\
+\texttt{java -cp out pruebas.EjecutorPruebas}     & 201 pruebas en total: resultado global, todas pasaron\\
+\bottomrule
+\end{longtable}
+
+\begin{longtable}{@{}p{7.2cm} p{7.6cm}@{}}
+\caption{Traza de la ejecución del programa factorial, línea por línea}\label{tab:traza}\\
+\toprule
+\textbf{Línea de código a ejecutar} & \textbf{Resultado del emulador}\\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Línea de código a ejecutar} & \textbf{Resultado del emulador}\\
+\midrule
+\endhead
+\texttt{lw \$t0, 100(\$zero)}\ \ (PC = 0) & \$t0 = Mem[100] = 7\\
+\texttt{addiu \$v0, \$zero, 4}\ \ (PC = 1) & \$v0 = 4 (servicio: imprimir cadena)\\
+\texttt{addiu \$a0, \$zero, 101}\ \ (PC = 2) & \$a0 = 101 (dirección de la cadena ``Factorial de '')\\
+\texttt{syscall}\ \ (PC = 3) & Salida en pantalla: ``Factorial de ''\\
+\texttt{addu \$a0, \$t0, \$zero}\ \ (PC = 4) & \$a0 = 7\\
+\texttt{addiu \$v0, \$zero, 1}\ \ (PC = 5) & \$v0 = 1 (servicio: imprimir entero)\\
+\texttt{syscall}\ \ (PC = 6) & Salida en pantalla: ``7''\\
+\texttt{addiu \$v0, \$zero, 4}\ \ (PC = 7) & \$v0 = 4 (servicio: imprimir cadena)\\
+\texttt{addiu \$a0, \$zero, 115}\ \ (PC = 8) & \$a0 = 115 (dirección de la cadena `` ='')\\
+\texttt{syscall}\ \ (PC = 9) & Salida en pantalla: `` = ''\\
+\texttt{addiu \$t1, \$zero, 1}\ \ (PC = 10) & \$t1 = 1 (acumulador del factorial)\\
+\texttt{addiu \$t2, \$zero, 1}\ \ (PC = 11) & \$t2 = 1 (contador del bucle)\\
+\texttt{slt \$t3, \$t0, \$t2}\ \ (PC = 12, 1.\textsuperscript{a} vez) & \$t3 = 0, porque 7 \textless{} 1 es falso\\
+\texttt{bne \$t3, \$zero, salida}\ \ (PC = 13, 1.\textsuperscript{a} vez) & No salta (\$t3 = 0); PC = 14\\
+\texttt{mult \$t0, \$t2}\ \ (PC = 14, 1.\textsuperscript{a} vez) & LO:HI = 7 × 1 = 7\\
+\texttt{mflo \$t1}\ \ (PC = 15, 1.\textsuperscript{a} vez) & \$t1 = LO = 7\\
+\texttt{addiu \$t2, \$t2, 1}\ \ (PC = 16, 1.\textsuperscript{a} vez) & \$t2 = 2\\
+\texttt{j 12}\ \ (PC = 17) & PC = 12 (regresa al inicio del bucle)\\
+Bucle PC 12 a 17 repetido hasta completar 7 multiplicaciones & \$t1 = 7 × 6 × 5 × 4 × 3 × 2 × 1 = 5040; \$t2 = 8\\
+\texttt{slt \$t3, \$t0, \$t2}\ \ (PC = 12, 8.\textsuperscript{a} vez) & \$t3 = 1, porque 7 \textless{} 8 es verdadero\\
+\texttt{bne \$t3, \$zero, salida}\ \ (PC = 13, 8.\textsuperscript{a} vez) & Sí salta: PC = 18 (sale del bucle)\\
+\texttt{addu \$a0, \$t1, \$zero}\ \ (PC = 18) & \$a0 = 5040\\
+\texttt{addiu \$v0, \$zero, 1}\ \ (PC = 19) & \$v0 = 1 (servicio: imprimir entero)\\
+\texttt{syscall}\ \ (PC = 20) & Salida en pantalla: ``5040''\\
+\texttt{addiu \$v0, \$zero, 4}\ \ (PC = 21) & \$v0 = 4 (servicio: imprimir cadena)\\
+\texttt{addiu \$a0, \$zero, 119}\ \ (PC = 22) & \$a0 = 119 (dirección del salto de línea)\\
+\texttt{syscall}\ \ (PC = 23) & Salida en pantalla: salto de línea\\
+\texttt{addiu \$v0, \$zero, 10}\ \ (PC = 24) & \$v0 = 10 (servicio: terminar el programa)\\
+\texttt{halt}\ \ (PC = 25) & La CPU se detiene con HALT; 63 ciclos; salida final: ``Factorial de 7 = 5040''\\
+\bottomrule
+\end{longtable}
+
+\subsubsection{Capturas de ejecución}
+
+Se muestra, para cada programa, el estado al \textbf{inicio} y al \textbf{fin} de
+la ejecución, tal como lo reporta el emulador.
+
+\captura[0.72\textwidth]{imagenes/ev_sumatoria_inicio.png}{Sumatoria: estado inicial (todos los registros en 0 y el mapa de memoria segmentado).}
+\captura[0.72\textwidth]{imagenes/ev_sumatoria_fin.png}{Sumatoria: fin de la ejecución; resultado 52 en 68 ciclos.}
+\captura[0.72\textwidth]{imagenes/ev_factorial_inicio.png}{Factorial: estado inicial de la emulación.}
+\captura[0.72\textwidth]{imagenes/ev_factorial_fin.png}{Factorial: fin de la ejecución; \$t1 = 5040 y LO = 5040 en 63 ciclos.}
+\captura[0.72\textwidth]{imagenes/ev_integral_inicio.png}{Integral: estado inicial de la emulación.}
+\captura[0.72\textwidth]{imagenes/ev_integral_fin.png}{Integral: fin de la ejecución; resultado 30 en 56 ciclos.}
+\captura[0.72\textwidth]{imagenes/ev_promedio_inicio.png}{Promedio: estado inicial de la emulación.}
+\captura[0.72\textwidth]{imagenes/ev_promedio_fin.png}{Promedio: fin de la ejecución; promedio 13 en 123 ciclos.}
+\captura[0.72\textwidth]{imagenes/ev_perceptron_inicio.png}{Perceptrón: estado inicial de la emulación.}
+\captura[0.72\textwidth]{imagenes/ev_perceptron_fin.png}{Perceptrón: fin de la ejecución; z = 3, y = 1 en 62 ciclos.}
+
+\captura[0.72\textwidth]{imagenes/ev_traza_factorial.png}{Factorial con \texttt{--traza}: primeros ciclos con el PC y el código de la instrucción en hexadecimal.}
+\captura[0.72\textwidth]{imagenes/ev_pruebas.png}{Ejecución de las 201 pruebas automáticas: 117 unitarias, 44 de integración y 40 de sistema, todas pasadas.}
+
+% =============================================================
+%            3. USO DE INTELIGENCIAS ARTIFICIALES
+% =============================================================
+\section{Uso de inteligencias artificiales para la generación de código}
+
+La inteligencia artificial generativa se utilizó como herramienta de apoyo en
+tres frentes: el \textbf{análisis del diseño}, la \textbf{generación de los
+planes de prueba} y la \textbf{redacción de los programas en ensamblador MIPS}.
+Los prompts fueron escritos por el equipo y ajustados de forma colaborativa; la
+respuesta de la herramienta \textbf{nunca se usó tal cual}: se ejecutó contra las
+suites de pruebas y se corrigió hasta que el comportamiento fue el esperado.
+
+A continuación se presentan, en orden, los \textbf{trece prompts} utilizados,
+quién los formuló y qué parte del proyecto produjo cada uno, junto con la
+captura de pantalla de la conversación.
+
+% ---------- Prompt 1 ----------
+\subsection{Prompt 1 — Yadid Soto (análisis del sistema de almacenamiento)}
+
+\begin{infobox}[title=Prompt]
+\small
+«Analiza las siguientes clases de mi proyecto en Java:
+\texttt{UnidadAlmacenamiento}, \texttt{RAM}, \texttt{ROM}, \texttt{Registros} y
+contador de programa. \texttt{<CÓDIGO>} ¿Qué unidades funcionales faltan para
+emular un procesador completo y cómo las reorganizarías en paquetes sin romper
+el código existente?»
+\end{infobox}
+
+\textbf{Resultado:} arquitectura modular en cinco paquetes: \texttt{cpu},
+\texttt{ejecucion}, \texttt{memoria}, \texttt{alu} y
+\ruta{instruccion}; la clase \ruta{MemoriaSistema} con el mapa de direcciones
+segmentado y el documento \ruta{docs/arquitectura.md}.
+
+\captura[0.62\textwidth]{imagenes/ia/p01_analisis_1.png}{Prompt 1: solicitud de análisis de las clases de almacenamiento y de qué unidades faltan.}
+\captura[0.62\textwidth]{imagenes/ia/p01_analisis_2.png}{Prompt 1, captura 2 de 4: unidades funcionales que faltan (núcleo de CPU, interconexión, memoria y E/S).}
+\captura[0.62\textwidth]{imagenes/ia/p01_analisis_3.png}{Prompt 1, captura 3 de 4: árbol de paquetes propuesto y cómo migrar sin romper el código.}
+\captura[0.62\textwidth]{imagenes/ia/p01_analisis_4.png}{Prompt 1, captura 4 de 4: inyección de dependencias, composición y resumen ejecutivo.}
+
+% ---------- Prompt 2 ----------
+\subsection{Prompt 2 — José de Jesús Berman (plan de pruebas unitarias)}
+
+\begin{infobox}[title=Prompt]
+\small
+«Genera un plan de pruebas para el emulador del procesador MIPS. Considera la
+unidad de almacenamiento (rango de direcciones y limpieza), los registros
+(\$zero de sólo lectura), la ALU (las operaciones y el desbordamiento), la
+decodificación de las instrucciones de formato R, I y J y el comportamiento del
+PC.»
+\end{infobox}
+
+\textbf{Resultado:} \ruta{docs/pruebas/plan\_pruebas\_unitarias.md} y
+\ruta{src/pruebas/PruebasUnitarias.java}: \textbf{117 pruebas} automáticas,
+todas pasadas.
+
+\captura[0.62\textwidth]{imagenes/ia/p02_unitarias_1.png}{Prompt 2, captura 1 de 4: rango de direcciones y segmentación.}
+\captura[0.62\textwidth]{imagenes/ia/p02_unitarias_2.png}{Prompt 2, captura 2 de 4: limpieza de memoria, \$zero y ALU.}
+\captura[0.62\textwidth]{imagenes/ia/p02_unitarias_3.png}{Prompt 2, captura 3 de 4: desbordamiento y decodificación de instrucciones.}
+\captura[0.62\textwidth]{imagenes/ia/p02_unitarias_4.png}{Prompt 2, captura 4 de 4: comportamiento del PC y matriz de trazabilidad.}
+
+% ---------- Prompt 3 ----------
+\subsection{Prompt 3 — José de Jesús Berman (plan de pruebas de integración)}
+
+\begin{infobox}[title=Prompt]
+\small
+«Genera un plan de pruebas de integración de código para el emulador de
+procesador MIPS. Verifica el ciclo completo (IF/ID/EX/MEM/WB), la conexión
+\texttt{MemoriaSistema} $\rightarrow$ \texttt{CPU} $\rightarrow$ \texttt{Registros} y RAM,
+el funcionamiento de las ramas (beq, bne, j, jr) y el uso de los syscalls.»
+\end{infobox}
+
+\textbf{Resultado:} \ruta{docs/pruebas/plan\_pruebas\_integracion.md} y
+\ruta{src/pruebas/PruebasIntegracion.java}: \textbf{44 pruebas}, todas
+pasadas.
+
+\captura[0.62\textwidth]{imagenes/ia/p03_integracion_1.png}{Prompt 3, captura 1 de 4: objetivo, alcance y estrategia de pruebas de integración.}
+\captura[0.62\textwidth]{imagenes/ia/p03_integracion_2.png}{Prompt 3, captura 2 de 4: entorno y verificación del ciclo completo y conexión memoria-CPU.}
+\captura[0.62\textwidth]{imagenes/ia/p03_integracion_3.png}{Prompt 3, captura 3 de 4: funcionamiento de las ramas y uso de los syscalls.}
+\captura[0.62\textwidth]{imagenes/ia/p03_integracion_4.png}{Prompt 3, captura 4 de 4: matriz de trazabilidad, herramientas y riesgos.}
+
+% ---------- Prompt 4 ----------
+\subsection{Prompt 4 — José de Jesús Berman (plan de pruebas de sistema)}
+
+\begin{infobox}[title=Prompt]
+\small
+«Genera un plan de pruebas de sistema para el código para el emulador del
+procesador MIPS. Ejecuta los cinco programas de usuario (sumatoria, factorial,
+integral, promedio y perceptron), comprueba sus salidas exactas, que cada uno
+termine con \texttt{halt}/\texttt{syscall} 10 y que el número de ciclos sea
+razonable.»
+\end{infobox}
+
+\textbf{Resultado:} \ruta{docs/pruebas/plan\_pruebas\_sistema.md} y
+\ruta{src/pruebas/PruebasSistema.java}: \textbf{40 pruebas}, todas
+pasadas.
+
+\captura[0.62\textwidth]{imagenes/ia/p04_sistema_1.png}{Prompt 4, captura 1 de 4: objetivo, alcance y entorno de pruebas de sistema.}
+\captura[0.62\textwidth]{imagenes/ia/p04_sistema_2.png}{Prompt 4, captura 2 de 4: casos TS-01 (sumatoria) a TS-04 (promedio).}
+\captura[0.62\textwidth]{imagenes/ia/p04_sistema_3.png}{Prompt 4, captura 3 de 4: caso TS-05 (perceptrón), verificación de halt y ciclos.}
+\captura[0.62\textwidth]{imagenes/ia/p04_sistema_4.png}{Prompt 4, captura 4 de 4: criterios globales, registro de resultados y entregables.}
+
+% ---------- Prompt 5 ----------
+\subsection{Prompt 5 — Miguel Damián (código de factorial; prompt literal de la práctica)}
+
+\begin{infobox}[title=Prompt]
+\small
+«A continuación te paso una lista de instrucciones del procesador MIPS que
+puedo compilar en mi emulador del procesador MIPS. Genera un código en lenguaje
+ensamblador para el procesador MIPS que implemente el factorial de un número.
+Incluye la explicación de cada línea de código. Sólo utiliza las instrucciones
+que te muestro a continuación. \texttt{<add, addu, sub, subu, and, or, xor, nor,
+slt, sltu, sll, srl, mult, div, mflo, mfhi, jr, syscall, addi, addiu, andi, ori,
+xori, slti, sltiu, lui, lw, sw, beq, bne, j, jal>}»
+\end{infobox}
+
+\textbf{Resultado:} \ruta{src/programas/Factorial.java} (25 instrucciones) y
+su explicación en \ruta{docs/programas/factorial\_explicacion.md}; al
+ejecutarlo el emulador muestra ``Factorial de 7 = 5040'' (63 ciclos).
+
+\captura[0.62\textwidth]{imagenes/ia/p05_factorial_1.png}{Prompt 5: programa de factorial en ensamblador MIPS y su explicación línea por línea.}
+
+% ---------- Prompt 6 ----------
+\subsection{Prompt 6 — Yadid Soto (sumatoria)}
+
+\begin{infobox}[title=Prompt]
+\small
+«Genera un código en lenguaje ensamblador MIPS que realice la sumatoria de los
+números desde el 3 hasta el 10 usando un bucle con beq/bne y slt para el
+control. Sólo utiliza las instrucciones de mi emulador: addu, addiu, slt, beq,
+bne, j, lw, sw y syscall. Incluye la explicación de cada línea.»
+\end{infobox}
+
+\textbf{Resultado:} \ruta{src/programas/Sumatoria.java}; el emulador imprime
+``Sumatoria de 3 a 10 = 52'' (68 ciclos).
+
+\captura[0.62\textwidth]{imagenes/ia/p06_sumatoria_1.png}{Prompt 6: sumatoria con bucle y control de flujo, explicada línea por línea.}
+
+% ---------- Prompt 7 ----------
+\subsection{Prompt 7 — Miguel Damián (integral definida)}
+
+\begin{infobox}[title=Prompt]
+\small
+«Genera código ensamblador MIPS que calcule la integral definida de
+f(x) = x\textsuperscript{2} desde x = 1 hasta x = 5, aproximada con
+rectángulos de ancho 1 (1\textsuperscript{2} + 2\textsuperscript{2} +
+3\textsuperscript{2} + 4\textsuperscript{2}). Usa mult y mflo para elevar al
+cuadrado, slt/beq para el bucle y syscall para imprimir el resultado con un
+mensaje. Sólo instrucciones de mi emulador y explica cada línea.»
+\end{infobox}
+
+\textbf{Resultado:} \ruta{src/programas/Integral.java}; el emulador imprime
+``Integral de x\^{}2 dx desde x=1 hasta x=5 = 30'' (56 ciclos).
+
+\captura[0.62\textwidth]{imagenes/ia/p07_integral_1.png}{Prompt 7: integral de x\textsuperscript{2} con mult/mflo y bucle controlado con slt/beq.}
+
+% ---------- Prompt 8 ----------
+\subsection{Prompt 8 — Yadid Soto (promedio de un vector)}
+
+\begin{infobox}[title=Prompt]
+\small
+«Genera código ensamblador MIPS que calcule el promedio del vector fijo \{4, 8,
+15, 16, 23\} almacenado en RAM: acumula los elementos en un bucle con lw y
+addu, después divide entre 5 con div y mflo, e imprime el vector y el promedio
+con los syscalls de cadena y entero. Sólo instrucciones soportadas por mi
+emulador.»
+\end{infobox}
+
+\textbf{Resultado:} \ruta{src/programas/Promedio.java}; el emulador imprime
+``Vector: 4 8 15 16 23'' y ``Promedio = 13'' (123 ciclos).
+
+\captura[0.62\textwidth]{imagenes/ia/p08_promedio_1.png}{Prompt 8, captura 1 de 2: acumulación del vector y cálculo del promedio.}
+\captura[0.62\textwidth]{imagenes/ia/p08_promedio_2.png}{Prompt 8, captura 2 de 2: impresión del vector y del promedio; notas de instrucciones usadas.}
+
+% ---------- Prompt 9 ----------
+\subsection{Prompt 9 — Miguel Damián (perceptrón)}
+
+\begin{infobox}[title=Prompt]
+\small
+«Genera código ensamblador MIPS que evalúe un perceptrón de 3 entradas con
+datos fijos: entradas x = \{1, 1, 0\}, pesos w = \{2, 2, -3\} y bias -1.
+Acumula el producto punto con mult/mflo en un bucle, suma el bias, aplica el
+umbral con slt contra \$zero y muestra el valor de z y la activación y. Sólo
+instrucciones de mi emulador, con la explicación de cada línea.»
+\end{infobox}
+
+\textbf{Resultado:} \ruta{src/programas/Perceptron.java}; el emulador imprime
+``z = 3\ \ y = 1'' (62 ciclos; z = 2·1 + 2·1 + (−3)·0 − 1 = 3, y = 1 porque
+z $\geq$ 0).
+
+\captura[0.62\textwidth]{imagenes/ia/p09_perceptron_1.png}{Prompt 9: perceptrón de 3 entradas con producto punto, bias y umbral.}
+
+% ---------- Prompt 10 ----------
+\subsection{Prompt 10 — Yadid Soto (clase ALU)}
+
+\begin{infobox}[title=Prompt]
+\small
+«Implementa en Java la clase ALU de un procesador MIPS de 32 bits con las
+operaciones ADD, ADDU, SUB, SUBU, AND, OR, XOR, NOR, SLT, SLTU, SLL, SRL y LUI,
+más NOP. Detecta el desbordamiento con signo en ADD y SUB y detiene el programa
+en ese caso, mientras que ADDU y SUBU envuelven el resultado. Devuelve también
+el resultado de las comparaciones SLT y SLTU.»
+\end{infobox}
+
+\textbf{Resultado:} \ruta{src/alu/ALU.java} y
+\ruta{src/alu/OperacionALU.java} (13 operaciones + NOP), probadas con las
+pruebas unitarias de la ALU.
+
+\captura[0.62\textwidth]{imagenes/ia/p10_alu_1.png}{Prompt 10, captura 1 de 2: implementación de la ALU de 32 bits en Java.}
+\captura[0.62\textwidth]{imagenes/ia/p10_alu_2.png}{Prompt 10, captura 2 de 2: pruebas de la ALU y puntos de diseño clave.}
+
+% ---------- Prompt 11 ----------
+\subsection{Prompt 11 — Miguel Damián (ventana gráfica del emulador)}
+
+\begin{infobox}[title=Prompt]
+\small
+«Genera una ventana en Java (Swing) para mi emulador del procesador MIPS con
+estos campos: instrucciones en binario (32 bits por línea, acepta hexadecimal y
+comentarios con \#), historial con Ciclo, PC, Instrucción, Operación, señales
+de control y PC siguiente, los 32 registros, la memoria por segmentos y el
+estado CPU (PC, HI, LO); botones: Ejecutar 1 ciclo, Ejecutar programa, Cargar
+en el PC, Cargar ejemplo, Reiniciar CPU y Limpiar historial.»
+\end{infobox}
+
+\textbf{Resultado:} \ruta{src/ui/VentanaEmulador.java}, usada para observar el
+estado de la CPU ciclo a ciclo y las señales de control.
+
+\captura[0.62\textwidth]{imagenes/ia/p11_ventana_1.png}{Prompt 11, captura 1 de 2: ventana Swing con historial, registros y estado de la CPU.}
+\captura[0.62\textwidth]{imagenes/ia/p11_ventana_2.png}{Prompt 11, captura 2 de 2: refresco de registros y memoria, y notas de uso.}
+
+% ---------- Prompt 12 ----------
+\subsection{Prompt 12 — José de Jesús Berman (documentación del conjunto de instrucciones)}
+
+\begin{infobox}[title=Prompt]
+\small
+«Genera la documentación del conjunto de instrucciones del procesador MIPS que
+soporta mi emulador: formato R con su campo funct, formato I con su opcode,
+formato J, los efectos de cada instrucción sobre los registros en binario de 32
+bits y la tabla de servicios de syscall con sus argumentos.»
+\end{infobox}
+
+\textbf{Resultado:} \ruta{docs/instrucciones.md}, referencia para escribir y
+revisar los cinco programas de usuario.
+
+\captura[0.62\textwidth]{imagenes/ia/p12_documentacion_1.png}{Prompt 12, captura 1 de 4: formatos de instrucción MIPS32 e instrucciones de formato R.}
+\captura[0.62\textwidth]{imagenes/ia/p12_documentacion_2.png}{Prompt 12, captura 2 de 4: instrucciones de formato I.}
+\captura[0.62\textwidth]{imagenes/ia/p12_documentacion_3.png}{Prompt 12, captura 3 de 4: instrucciones de formato J y tabla de servicios syscall.}
+\captura[0.62\textwidth]{imagenes/ia/p12_documentacion_4.png}{Prompt 12, captura 4 de 4: tabla de servicios syscall y resumen de codificación binaria.}
+
+% ---------- Prompt 13 ----------
+\subsection{Prompt 13 — Equipo (reestructuración final a cinco paquetes)}
+
+\begin{infobox}[title=Prompt]
+\small
+«Reorganiza el emulador en 5 paquetes grandes (cpu, ejecucion, memoria, alu,
+instruccion) al estilo del diagrama del compañero, con la memoria segmentada
+por dirección (ROM texto@0, RAM datos@100, disco@200), una CPU que nunca muere
+(arranca en 0, PC circular, memoria en 0 = NOP, límite de 100000 ciclos) y una
+instrucción HALT para que la CPU sepa que el programa terminó; añade pruebas y
+regenera los diagramas.»
+\end{infobox}
+
+\textbf{Resultado:} la estructura actual del proyecto, los diagramas de clases
+en \texttt{docs/diagramas/} y las \textbf{201 pruebas} (117 + 44 + 40) que pasan
+con \texttt{./probar.sh}.
+
+\captura[0.62\textwidth]{imagenes/ia/p13_reestructuracion_1.png}{Prompt 13, captura 1 de 4: árbol de paquetes propuesto, mapa de memoria y paquete memoria.}
+\captura[0.62\textwidth]{imagenes/ia/p13_reestructuracion_2.png}{Prompt 13, captura 2 de 4: paquete instrucción (Opcode, Instrucción y Decodificador).}
+\captura[0.62\textwidth]{imagenes/ia/p13_reestructuracion_3.png}{Prompt 13, captura 3 de 4: paquete cpu (CPU con límite de ciclos y HALT).}
+\captura[0.62\textwidth]{imagenes/ia/p13_reestructuracion_4.png}{Prompt 13, captura 4 de 4: pruebas JUnit 5 de memoria y cpu.}
+
+\subsection{Reflexión sobre el uso de la inteligencia artificial}
+
+La IA se usó como \textbf{copiloto}: análisis del diseño, planes de pruebas,
+programas de usuario, ventana y explicaciones. Las \textbf{decisiones} las tomó
+el equipo: elegir MIPS, la segmentación de la memoria por dirección, el
+\texttt{HALT} propio (opcode \texttt{0x3F}), la CPU que nunca muere y el límite
+de 100\,000 ciclos. La \textbf{validación} también: correr las 201 pruebas y las
+capturas de \texttt{salidas/}. Varios resultados iniciales de la IA no compilaban
+o no se comportaban como se esperaba (por ejemplo, las señales de control, que
+se reconstruyeron con un \emph{Builder} para evitar errores de argumentos
+posicionales) y se corrigieron a mano.
+
+En síntesis, la IA ahorra horas, pero sólo es útil si se sabe qué pedir y se
+puede comprobar la respuesta con pruebas automatizadas.
+
+% =============================================================
+%                  4. REFLEXIONES FINALES
+% =============================================================
+\section{Reflexiones finales}
+
+\subsection{Nivel de programación que se requiere}
+
+Implementar este tipo de emuladores no exige ser un programador experto, pero sí
+un nivel intermedio sólido y, sobre todo, orden. Se necesita dominar
+programación orientada a objetos en Java (clases, paquetes y encapsulamiento;
+incluso algo de herencia, como \texttt{DiscoDuro} que se deriva de
+\texttt{UnidadAlmacenamiento}), manejar arreglos y operaciones a nivel de bits,
+y estar cómodo con números binarios y hexadecimales.
+
+El verdadero reto no es escribir la primera versión del código, sino depurar:
+cuando la salida no coincide con la esperada hay que rastrear el estado del PC,
+los registros y la memoria ciclo por ciclo. También se requiere capacidad de
+leer una especificación técnica (el manual de MIPS) y traducirla a código, más
+el hábito de escribir pruebas antes de dar por bueno un módulo. En síntesis, el
+nivel de programación es el de un estudiante avanzado, pero lo que hace que el
+proyecto funcione es la constancia y la disciplina de la verificación.
+
+\subsection{El trabajo en equipo en el diseño e implementación de un procesador}
+
+Un procesador, aun tratándose de un emulador básico, es una tarea demasiado
+grande para una sola persona, y esta práctica lo confirmó. Repartimos el trabajo
+por módulos: \textbf{Yadid} trabajó las unidades de almacenamiento y la ALU,
+además de los programas de sumatoria y promedio; \textbf{José de Jesús} armó el
+sistema de pruebas (unitarias, de integración y de sistema), la documentación
+técnica y el DiscoDuro; \textbf{Miguel} implementó los programas de factorial,
+integral y perceptrón y la ventana gráfica.
+
+Lo más importante no fue el reparto, sino la \textbf{integración}: acordamos
+desde el inicio convenciones comunes (nombres de paquetes, ancho de palabra,
+mapa de direcciones y firmas de las clases), nos revisamos el código mutuamente
+y corríamos las tres suites de pruebas antes de dar por concluida cualquier
+tarea. Comparar nuestro diagrama de clases con el de un compañero fue
+especialmente útil: nos obligó a explicitar las decisiones de diseño y a
+unificar el esqueleto de cinco paquetes antes de escribir el código. Así como
+en la industria existen equipos separados de diseño, verificación y firmware,
+nosotros separamos la construcción del emulador de su verificación, y eso nos
+permitió encontrar errores que un solo programador probablemente no habría
+visto.
+
+\subsection{Por qué les conviene a quienes cursarán esta experiencia el próximo año}
+
+A los estudiantes que tomen este curso el próximo año les conviene este
+conocimiento por tres razones prácticas. La primera es que \textbf{conecta todas
+las capas de la computación}: quien entiende el ciclo de un procesador entiende
+qué hace realmente un compilador, por qué una instrucción cuesta lo que cuesta y
+cómo se comporta la memoria; deja de programar a ciegas. La segunda es que
+\textbf{mejora como programador}: depurar a nivel de registros enseña a razonar
+con estado y con tiempos, habilidad aplicable a sistemas embebidos, IoT,
+sistemas operativos y verificación de hardware, áreas con demanda laboral
+constante. La tercera es que \textbf{aprenden a usar la inteligencia artificial
+con criterio}: en esta práctica la IA nos ahorró muchas horas, pero sólo
+funcionó porque sabíamos qué pedir y podíamos comprobar la respuesta con
+pruebas; sin esos dos componentes, la herramienta devuelve código que parece
+correcto y no lo es. A esto se suma la experiencia de trabajar en equipo y
+entregar un reporte formal, situaciones que se parecen cada vez más a lo que será
+su vida profesional.
+
+\subsection{Valores en juego}
+
+La práctica puso en acción los valores de la universidad: \textbf{libertad} para
+elegir cómo estructurar cada módulo y qué decisiones de diseño tomar;
+\textbf{responsabilidad} por la parte que a cada quien le tocó y por entregar el
+trabajo en la fecha y por el medio establecidos; \textbf{solidaridad} al
+apoyarnos cuando un compañero se atascaba y al compartir lo que entendíamos;
+\textbf{respeto} por las ideas y el estilo de los demás, sin imponer la propia
+solución; \textbf{honestidad} al reportar exactamente lo que las pruebas
+arrojaron, incluidos los errores que encontramos, sin maquillar resultados; e
+\textbf{integridad} al cumplir con lo que nos comprometimos, presentando nuestro
+propio trabajo y utilizando la inteligencia artificial únicamente como
+herramienta de apoyo, dejando constancia de su uso en este reporte.
+
+% =============================================================
+%                       5. REFERENCIAS
+% =============================================================
+\section{Referencias}
+
+\begin{itemize}[leftmargin=1.5em,itemsep=4pt]
+  \item Patterson, D. A., \& Hennessy, J. L. (2009). \emph{Computer organization
+    and design: The hardware/software interface} (4.\textsuperscript{a} ed.).
+    Morgan Kaufmann.
+  \item Harris, D. G., \& Harris, S. L. (2012). \emph{Digital design and computer
+    architecture: MIPS Edition}. Morgan Kaufmann.
+  \item Hamacher, V. C., Vranesic, Z. G., Zaky, S. A., \& Manjikian, N. (2002).
+    \emph{Computer organization} (5.\textsuperscript{a} ed.). McGraw-Hill.
+  \item MIPS Technologies. (s. f.). \emph{MIPS32 architecture for programmers,
+    volume I: Introduction to the MIPS32 architecture}. Recuperado de
+    \url{https://www.mips.com/}
+  \item Universidad Veracruzana. (2026). \emph{Práctica 2. Emulador básico de un
+    procesador} [Instrucciones de la asignatura y plantilla del reporte]. Eminus.
+\end{itemize}
+
+\end{document}

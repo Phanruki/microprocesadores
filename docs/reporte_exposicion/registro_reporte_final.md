@@ -106,18 +106,20 @@ Todo el material del reporte vive ahora en la documentación del proyecto
 | Archivo | Qué contiene |
 |---|---|
 | `docs/reporte_exposicion/registro_reporte_final.md` (este archivo) | datos de portada, material de la introducción, tablas de evidencia, reflexiones y pendientes |
-| `docs/reporte_exposicion/prompts_usados.md` | los **14 prompts** completos de la sección "Uso de IA" (con autor, texto y resultado) |
+| `docs/reporte_exposicion/prompts_usados.md` | los **13 prompts** completos de la sección "Uso de IA" (con autor, texto y resultado; el prompt de `DiscoDuro` se excluyó del reporte) |
 | `docs/reporte_exposicion/preparacion_exposicion.md` | explicación para exponer + preguntas probables del profesor |
 | `docs/arquitectura.md`, `docs/instrucciones.md` | arquitectura y conjunto de instrucciones |
 | `docs/pruebas/plan_pruebas_*.md` | los 3 planes de pruebas |
 | `docs/programas/factorial_explicacion.md` | explicación línea por línea del factorial |
 | `docs/diagramas/*.png` / `.puml` | diagramas de clases regenerados |
-| `docs/practica/final/plantillas/Reporte_LaTeX/main.tex` (+ `imagenes/`) | **ejemplo** de reporte en LaTeX con estética UV (proyecto "NetPro") → referencia de formato, no plantilla en blanco |
+| `docs/practica/final/plantillas/Reporte_LaTeX/main.tex` (+ `imagenes/`) | plantilla de reporte UV en LaTeX (proyecto "NetPro") → **base copiada y modificada** para `reporte_final.tex` |
 | `docs/practica/final/plantillas/presentacion_plantilla.pptx` | **ejemplo** de presentación UV usada en un curso anterior → referencia de estructura |
 | `docs/practica/ejemplo_expo.pdf`, `docs/practica/DiagramaDiego.jpg` | ejemplos de referencia de compañeros |
-| **`docs/reporte_exposicion/reporte_final/reporte_final.docx`** | **el reporte final** (único archivo): 12 figuras de evidencia + 2 tablas + índice de prompts |
+| **`docs/reporte_exposicion/reporte_final/reporte_final.tex`** | **el reporte final** (único archivo): copia modificada de la plantilla UV `Reporte_LaTeX/main.tex` (mismo estilo: colores, tipografía, encabezados y pies) |
+| `docs/reporte_exposicion/reporte_final/reporte_final.pdf` | PDF compilado con XeLaTeX (61 páginas) — el `.docx` anterior se eliminó por no seguir el formato |
+| `docs/reporte_exposicion/reporte_final/imagenes/ev_*.png` | 12 figuras de evidencia (inicio/fin de cada programa, traza y pruebas) |
+| `docs/reporte_exposicion/reporte_final/imagenes/ia/*.png` | **34 capturas de las conversaciones de IA** (los 13 prompts, renombradas `pNN_tema_M.png`) |
 | `docs/reporte_exposicion/reporte_final/generar_capturas.py` | convierte `salidas/*_captura.txt` en las 12 imágenes de terminal |
-| `docs/reporte_exposicion/reporte_final/generar_reporte_docx.py` | regenera el `.docx` a partir del material de este registro |
 
 Datos clave que debe reflejar el reporte (verificados, secciones 0.1 y 0.2):
 estructura de **5 paquetes**, **201 pruebas** (117 + 44 + 40), ciclo de
@@ -274,9 +276,10 @@ el rubro aplicable es "Uso de IA"** (según `docs/practica/reporte_final.txt`:
 *"el equipo reconoce y describe plenamente el uso de IA"*), no el de CACHÉton
 que aparece en una copia de la práctica.
 
-Los **14 prompts** completos (con autor, texto y resultado) están en
+Los **13 prompts** completos (con autor, texto y resultado) están en
 **`docs/reporte_exposicion/prompts_usados.md`**; ese archivo es el que se copia
-al reporte. Resumen:
+al reporte. (El prompt 11 original, sobre `DiscoDuro`, **se excluyó del
+reporte** por decisión del equipo: no se conservan sus capturas.) Resumen:
 
 | # | Autor | Tema |
 |---|---|---|
@@ -290,10 +293,16 @@ al reporte. Resumen:
 | 8 | Yadid | Promedio de {4, 8, 15, 16, 23} |
 | 9 | Miguel | Perceptrón con entradas fijas |
 | 10 | Yadid | Clase ALU |
-| 11 | José de Jesús | `DiscoDuro` (copia de la unidad de almacenamiento) |
-| 12 | Miguel | Ventana gráfica (`ui.VentanaEmulador`) |
-| 13 | José de Jesús | Documentación del conjunto de instrucciones |
-| 14 | Equipo | Reestructuración final a 5 paquetes + HALT + CPU que nunca muere |
+| 11 | Miguel | Ventana gráfica (`ui.VentanaEmulador`) |
+| 12 | José de Jesús | Documentación del conjunto de instrucciones |
+| 13 | Equipo | Reestructuración final a 5 paquetes + HALT + CPU que nunca muere |
+
+**Capturas de pantalla de los prompts**: el equipo pegó las 34 capturas de las
+conversaciones en `docs/practica/final/capturas/` (originales, nombres
+`Pasted image (N).png`); ya están identificadas una por una, copiadas y
+renombradas en `docs/reporte_exposicion/reporte_final/imagenes/ia/` como
+`pNN_tema_M.png` y **insertadas dentro del propio `reporte_final.tex`** en su
+subsección correspondiente.
 
 **Reflexión sobre IA para el reporte**: la IA se usó como copiloto (diseño de
 la estructura de paquetes, generación de pruebas y redacción de explicaciones),
@@ -400,39 +409,45 @@ Decisiones que conviene mencionar en el reporte:
 - [x] Unificar el término **"emulador"** en código, scripts, documentación y
       diagramas (hecho: clases `ui.Emulador` y `ui.VentanaEmulador`,
       `./compilar.sh`, `./probar.sh` y diagramas regenerados).
-- [x] Declaración de IA → rubro **"Uso de IA"** con los 14 prompts de
-      `docs/reporte_exposicion/prompts_usados.md`.
+- [x] Declaración de IA → rubro **"Uso de IA"** con los 13 prompts de
+      `docs/reporte_exposicion/prompts_usados.md` (se excluyó el de `DiscoDuro`).
 - [x] Diagramas de clases regenerados (`docs/diagramas/*.png`) con los nombres
       actuales.
-- [x] **Reporte final redactado**: `docs/reporte_exposicion/reporte_final/reporte_final.docx`
-      (generado por `generar_reporte_docx.py`; secciones: introducción, desarrollo,
-      evidencia con 2 tablas y **12 figuras**, uso de IA con índice de prompts,
-      reflexiones y referencias).
+- [x] **Reporte final redactado**: `docs/reporte_exposicion/reporte_final/reporte_final.tex`
+      (copia modificada de la plantilla UV `Reporte_LaTeX/main.tex`; secciones:
+      introducción, desarrollo, evidencia con 2 tablas y **12 figuras**, uso de
+      IA con los 13 prompts y sus **34 capturas insertadas**, reflexiones y
+      referencias).
+- [x] **Reporte compilado**: `reporte_final.pdf` (61 páginas, tamaño carta,
+      compilado con XeLaTeX vía Tectonic; el `.docx` anterior se eliminó por no
+      seguir el formato de la plantilla).
 - [x] **Capturas de pantalla (imágenes)**: `generar_capturas.py` convierte las
-      salidas reales en 12 PNG de terminal dentro de `reporte_final/imagenes/`.
+      salidas reales en 12 PNG de terminal dentro de `reporte_final/imagenes/`;
+      las 34 capturas de los prompts están en `reporte_final/imagenes/ia/`.
 
 ## 8. Pendientes que quedan en el documento (los hace el equipo)
 
-- [ ] **Insertar portada y anteportada** de la plantilla UV al inicio del `.docx`
-      (el equipo las tiene en PDF; en el documento hay una nota gris que marca
-      el lugar).
-- [ ] **Pegar las capturas de los 14 prompts** en la sección "Uso de
-      inteligencias artificiales": hay una nota gris que marca el lugar y el
-      orden está en `docs/reporte_exposicion/prompts_usados.md`.
+- [ ] **Insertar portada y anteportada** de la plantilla UV al inicio del PDF
+      (el equipo las tiene en PDF; el `.tex` deja el documento listo para
+      agregarlas: el índice inicia en página romana 2).
 - [ ] Poner la **fecha de entrega** real en la portada.
-- [ ] Revisar el documento en Word (estilos, numeración de figuras y tablas).
-- [ ] **Exportar a PDF** (Word → Guardar como PDF) y subirlo **únicamente por
-      Eminus**.
+- [ ] Revisar el PDF página por página (estilos, numeración de figuras y
+      tablas).
+- [ ] Subir el PDF **únicamente por Eminus**.
 
 ## 9. Cómo regenerar los artefactos
 
 ```bash
 ./compilar.sh && ./probar.sh && ./ejecutar_programas.sh   # salidas reales
 python3 docs/reporte_exposicion/reporte_final/generar_capturas.py      # 12 PNG
-python3 docs/reporte_exposicion/reporte_final/generar_reporte_docx.py  # .docx
+cd docs/reporte_exposicion/reporte_final
+xelatex reporte_final.tex && xelatex reporte_final.tex   # índice completo
+# o bien: tectonic reporte_final.tex   (compila dos pasadas solo)
 ```
 
 > Las figuras de evidencia **no son inventadas**: `generar_capturas.py` toma el
 > texto literal de `salidas/*_captura.txt` y de la salida de
 > `pruebas.EjecutorPruebas` y sólo lo pinta con aspecto de terminal. Si cambian
 > los programas, se vuelven a generar con los comandos de arriba.
+> En Windows/macOS sin TeX: subir la carpeta `reporte_final/` completa a
+> Overleaf y compilar con **XeLaTeX** (las imágenes están en `imagenes/`).
