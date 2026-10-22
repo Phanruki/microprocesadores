@@ -5,7 +5,7 @@
 > final se entrega como **PDF por Eminus** (nunca por otro medio) usando la
 > **plantilla UV**.
 
-Requisitos del reporte (de `docs/reporte_final.txt`):
+Requisitos del reporte (de `docs/practica/reporte_final.txt`):
 
 1. Portada: nombres, matrículas, título, fecha de entrega + plantilla UV.
 2. Introducción: (a) razones para desarrollar un procesador propio desde cero,

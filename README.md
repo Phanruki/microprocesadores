@@ -28,7 +28,13 @@ src/
   programas/         Sumatoria, Factorial, Integral, Promedio, Perceptron, Impresion
   pruebas/           MiniTest, PruebasUnitarias, PruebasIntegracion,
                      PruebasSistema, EjecutorPruebas
-docs/                arquitectura, planes de pruebas, diagramas de clases
+docs/
+  arquitectura.md, instrucciones.md   documentacion principal
+  practica/         practica del profesor, requisitos del reporte, diagrama de referencia
+  programas/        explicacion de los programas
+  pruebas/          planes de pruebas (unitarias, integracion, sistema)
+  diagramas/        diagramas de clases (puml + png) y como regenerarlos
+  reporte_exposicion/  registro del reporte final y preparacion de la exposicion
 salidas/             capturas de ejecucion (inicio y fin) de cada programa
 ```
 
@@ -106,10 +112,13 @@ Capturas inicio/fin: carpeta `salidas/`. Script: `./ejecutar_programas.sh`
 
 - `docs/arquitectura.md` - Paso 1 y 2 (5 paquetes, segmentos, CPU nunca muere, HALT)
 - `docs/instrucciones.md` - conjunto de instrucciones (incluye halt)
-- `docs/diagrama_clases_nucleo.png` / `.puml` - diagrama del nucleo (5 paquetes)
-- `docs/diagrama_clases_exterior.png` / `.puml` - como se usa el nucleo (ui, programas, pruebas)
-- `docs/generacion_diagrama_clases.md` - como regenerar los diagramas
-- `docs/plan_pruebas_unitarias.md`
-- `docs/plan_pruebas_integracion.md`
-- `docs/plan_pruebas_sistema.md`
-- `docs/factorial_explicacion.md`
+- `docs/diagramas/diagrama_clases_nucleo.png` / `.puml` - diagrama del nucleo (5 paquetes)
+- `docs/diagramas/diagrama_clases_exterior.png` / `.puml` - como se usa el nucleo (ui, programas, pruebas)
+- `docs/diagramas/generacion_diagrama_clases.md` - como regenerar los diagramas
+- `docs/pruebas/plan_pruebas_unitarias.md`
+- `docs/pruebas/plan_pruebas_integracion.md`
+- `docs/pruebas/plan_pruebas_sistema.md`
+- `docs/programas/factorial_explicacion.md`
+- `docs/practica/practica.txt` y `docs/practica/reporte_final.txt` - la practica y sus requisitos
+- `docs/reporte_exposicion/registro_reporte_final.md` - todo lo acumulado para el reporte
+- `docs/reporte_exposicion/preparacion_exposicion.md` - preguntas y respuestas para exponer

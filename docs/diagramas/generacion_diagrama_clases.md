@@ -56,7 +56,7 @@ sudo dnf install plantuml
 sudo apt install plantuml
 ```
 
-Con eso, basta con `plantuml docs/diagrama_clases_nucleo.puml` en lugar de
+Con eso, basta con `plantuml docs/diagramas/diagrama_clases_nucleo.puml` en lugar de
 `java -jar /tmp/opencode/plantuml/plantuml.jar ...`.
 
 ## Cómo regenerar los diagramas
@@ -68,19 +68,20 @@ JAR=/tmp/opencode/plantuml/plantuml.jar
 
 # PNG (mapa de bits, tamaño real) — sin -o: la salida queda junto al .puml
 java -jar "$JAR" -tpng \
-  docs/diagrama_clases_nucleo.puml \
-  docs/diagrama_clases_exterior.puml
+  docs/diagramas/diagrama_clases_nucleo.puml \
+  docs/diagramas/diagrama_clases_exterior.puml
 
 # SVG (vectorial), si hace falta
 java -jar "$JAR" -tsvg \
-  docs/diagrama_clases_nucleo.puml \
-  docs/diagrama_clases_exterior.puml
+  docs/diagramas/diagrama_clases_nucleo.puml \
+  docs/diagramas/diagrama_clases_exterior.puml
 ```
 
 Notas:
-- No indicar `-o docs` cuando los `.puml` ya estan en `docs/`: PlantUML
-  interpreta `-o` como relativo al archivo de entrada y crearia `docs/docs/`.
-  Sin `-o`, el PNG se escribe junto al `.puml`.
+- No indicar `-o docs/diagramas` cuando los `.puml` ya estan en
+  `docs/diagramas/`: PlantUML interpreta `-o` como relativo al archivo de
+  entrada y crearia `docs/diagramas/docs/diagramas/`. Sin `-o`, el PNG se
+  escribe junto al `.puml`.
 - No usar dos flags de formato en la misma llamada (por ejemplo
   `-tsvg -tpng`): solo aplica el último. Ejecutar un comando por formato.
 - Evitar `-Sdpi=144` (u otros DPI altos) en el PNG: la imagen supera el límite
@@ -98,7 +99,7 @@ Tras regenerar, comprobar que los PNG tienen un tamaño razonable:
 ```bash
 python3 - <<'EOF'
 import struct
-for f in ['docs/diagrama_clases_nucleo.png', 'docs/diagrama_clases_exterior.png']:
+for f in ['docs/diagramas/diagrama_clases_nucleo.png', 'docs/diagramas/diagrama_clases_exterior.png']:
     with open(f, 'rb') as fh:
         d = fh.read(33)
     print(f, struct.unpack('>II', d[16:24]))

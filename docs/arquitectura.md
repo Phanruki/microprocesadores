@@ -16,7 +16,7 @@ implementar el simulador por unidades funcionales.
 ## Estructura: 5 paquetes grandes
 
 El nucleo del emulador esta organizado en 5 paquetes grandes, al estilo del
-diagrama del compañero (`docs/DiagramaDiego.jpg`):
+diagrama del compañero (`docs/practica/DiagramaDiego.jpg`):
 
 | Paquete | Contenido |
 |---------|-----------|

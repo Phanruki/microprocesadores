@@ -55,7 +55,7 @@ Además, los conceptos son los mismos que en cualquier procesador real.
 ## 3. Las piezas del procesador que implementamos (los "5 paquetes grandes")
 
 Organizamos el núcleo en 5 paquetes grandes, igual que el diagrama del
-compañero (`docs/DiagramaDiego.jpg`):
+compañero (`docs/practica/DiagramaDiego.jpg`):
 
 | Paquete | Qué es en la vida real | Clases |
 |---|---|---|
