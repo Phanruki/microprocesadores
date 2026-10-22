@@ -115,6 +115,9 @@ Todo el material del reporte vive ahora en la documentación del proyecto
 | `docs/practica/final/plantillas/Reporte_LaTeX/main.tex` (+ `imagenes/`) | **ejemplo** de reporte en LaTeX con estética UV (proyecto "NetPro") → referencia de formato, no plantilla en blanco |
 | `docs/practica/final/plantillas/presentacion_plantilla.pptx` | **ejemplo** de presentación UV usada en un curso anterior → referencia de estructura |
 | `docs/practica/ejemplo_expo.pdf`, `docs/practica/DiagramaDiego.jpg` | ejemplos de referencia de compañeros |
+| **`docs/reporte_exposicion/reporte_final/reporte_final.docx`** | **el reporte final** (único archivo): 12 figuras de evidencia + 2 tablas + índice de prompts |
+| `docs/reporte_exposicion/reporte_final/generar_capturas.py` | convierte `salidas/*_captura.txt` en las 12 imágenes de terminal |
+| `docs/reporte_exposicion/reporte_final/generar_reporte_docx.py` | regenera el `.docx` a partir del material de este registro |
 
 Datos clave que debe reflejar el reporte (verificados, secciones 0.1 y 0.2):
 estructura de **5 paquetes**, **201 pruebas** (117 + 44 + 40), ciclo de
@@ -401,23 +404,35 @@ Decisiones que conviene mencionar en el reporte:
       `docs/reporte_exposicion/prompts_usados.md`.
 - [x] Diagramas de clases regenerados (`docs/diagramas/*.png`) con los nombres
       actuales.
-- [ ] Redactar el documento con la **plantilla UV** que se descarga de Eminus
-      (o, si el equipo decide, replicando el estilo del ejemplo en LaTeX
-      `docs/practica/final/plantillas/Reporte_LaTeX/main.tex`) usando las
-      secciones 1 a 5 de este registro y **generar el PDF**. Ojo: `xelatex`
-      **no está instalado** en este equipo; si se va por LaTeX, compilar en
-      línea con **Overleaf** (subiendo `main.tex` + `imagenes/`) o instalar
-      TeX Live (`sudo dnf install texlive-xetex texlive-spanish` en Fedora).
+- [x] **Reporte final redactado**: `docs/reporte_exposicion/reporte_final/reporte_final.docx`
+      (generado por `generar_reporte_docx.py`; secciones: introducción, desarrollo,
+      evidencia con 2 tablas y **12 figuras**, uso de IA con índice de prompts,
+      reflexiones y referencias).
+- [x] **Capturas de pantalla (imágenes)**: `generar_capturas.py` convierte las
+      salidas reales en 12 PNG de terminal dentro de `reporte_final/imagenes/`.
+
+## 8. Pendientes que quedan en el documento (los hace el equipo)
+
+- [ ] **Insertar portada y anteportada** de la plantilla UV al inicio del `.docx`
+      (el equipo las tiene en PDF; en el documento hay una nota gris que marca
+      el lugar).
+- [ ] **Pegar las capturas de los 14 prompts** en la sección "Uso de
+      inteligencias artificiales": hay una nota gris que marca el lugar y el
+      orden está en `docs/reporte_exposicion/prompts_usados.md`.
 - [ ] Poner la **fecha de entrega** real en la portada.
-- [ ] Elegir 5–8 filas de las tablas de la sección 3 (copiar la salida real).
-- [ ] Decidir si la tabla de evidencia del factorial se queda en ensamblador
-      (`lw $t0, 100($zero)` → `$t0 = Mem[100] = 7`, que **coincide** con el
-      binario real `0x8C080064`) o se muestra también el hexadecimal de `--traza`.
-- [ ] **Capturas de pantalla (imágenes)** al inicio y al final de cada
-      ejecución, como pide el Paso 4: existen las capturas de **texto**
-      (`salidas/*_captura.txt`); falta confirmar si el profesor exige
-      imágenes/figuras dentro del PDF.
-- [ ] Redactar las reflexiones (sección 5) con voz propia del equipo.
-- [ ] Borrar (o ignorar) la carpeta **`entregable_escuela/`**: ya no se usa; el
-      material vive en `docs/`.
-- [ ] Exportar a **PDF** y subirlo **únicamente por Eminus**.
+- [ ] Revisar el documento en Word (estilos, numeración de figuras y tablas).
+- [ ] **Exportar a PDF** (Word → Guardar como PDF) y subirlo **únicamente por
+      Eminus**.
+
+## 9. Cómo regenerar los artefactos
+
+```bash
+./compilar.sh && ./probar.sh && ./ejecutar_programas.sh   # salidas reales
+python3 docs/reporte_exposicion/reporte_final/generar_capturas.py      # 12 PNG
+python3 docs/reporte_exposicion/reporte_final/generar_reporte_docx.py  # .docx
+```
+
+> Las figuras de evidencia **no son inventadas**: `generar_capturas.py` toma el
+> texto literal de `salidas/*_captura.txt` y de la salida de
+> `pruebas.EjecutorPruebas` y sólo lo pinta con aspecto de terminal. Si cambian
+> los programas, se vuelven a generar con los comandos de arriba.
