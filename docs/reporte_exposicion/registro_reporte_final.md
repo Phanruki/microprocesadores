@@ -112,6 +112,9 @@ Todo el material del reporte vive ahora en la documentación del proyecto
 | `docs/pruebas/plan_pruebas_*.md` | los 3 planes de pruebas |
 | `docs/programas/factorial_explicacion.md` | explicación línea por línea del factorial |
 | `docs/diagramas/*.png` / `.puml` | diagramas de clases regenerados |
+| `docs/practica/final/plantillas/Reporte_LaTeX/main.tex` (+ `imagenes/`) | **ejemplo** de reporte en LaTeX con estética UV (proyecto "NetPro") → referencia de formato, no plantilla en blanco |
+| `docs/practica/final/plantillas/presentacion_plantilla.pptx` | **ejemplo** de presentación UV usada en un curso anterior → referencia de estructura |
+| `docs/practica/ejemplo_expo.pdf`, `docs/practica/DiagramaDiego.jpg` | ejemplos de referencia de compañeros |
 
 Datos clave que debe reflejar el reporte (verificados, secciones 0.1 y 0.2):
 estructura de **5 paquetes**, **201 pruebas** (117 + 44 + 40), ciclo de
@@ -142,8 +145,17 @@ estructura de **5 paquetes**, **201 pruebas** (117 + 44 + 40), ciclo de
 - Fecha de entrega: **pendiente de fijar** (colocar el mes/año reales de la
   entrega en Eminus).
 - Lema UV (portada y pie): **"Lis de Veracruz: Arte, Ciencia, Luz"** (+ `www.uv.mx`).
-- Plantilla UV: **descargarla desde Eminus** (la práctica dice "Descargar
-  plantilla UV"); el documento final se entrega **únicamente en PDF por Eminus**.
+- Plantilla UV para el reporte: la práctica dice descargarla de **Eminus**
+  ("Descargar plantilla UV"). El documento final se entrega **únicamente en PDF
+  por Eminus**. Como **referencias de estilo UV** quedaron en el proyecto:
+  - `docs/practica/final/plantillas/Reporte_LaTeX/main.tex` (+ `imagenes/`):
+    **reporte completo** de otro proyecto ("NetPro") en LaTeX con estética UV
+    (portada UV, `logo_uv.png`, `deco_uv.png`, índice, figuras, tablas);
+    compila con **XeLaTeX** (no instalado aquí → Overleaf o instalar TeX Live).
+  - `docs/practica/final/plantillas/presentacion_plantilla.pptx`: **presentación
+    ya usada** en un curso anterior (Protocolo de Investigación, sept. 2025,
+    Soto Hernández/Del Ángel) → referencia de estructura de portada UV.
+  - `docs/practica/ejemplo_expo.pdf`: ejemplo de exposición de un compañero.
 - Secciones que debe tener el documento (según la práctica): **Portada ·
   Introducción · Evidencia de ejecución del código · Uso de inteligencias
   artificiales (prompts) · Reflexiones finales** (+ referencias, opcional).
@@ -389,8 +401,13 @@ Decisiones que conviene mencionar en el reporte:
       `docs/reporte_exposicion/prompts_usados.md`.
 - [x] Diagramas de clases regenerados (`docs/diagramas/*.png`) con los nombres
       actuales.
-- [ ] Redactar el documento con **plantilla UV** (descargarla de Eminus) usando
-      las secciones 1 a 5 de este registro.
+- [ ] Redactar el documento con la **plantilla UV** que se descarga de Eminus
+      (o, si el equipo decide, replicando el estilo del ejemplo en LaTeX
+      `docs/practica/final/plantillas/Reporte_LaTeX/main.tex`) usando las
+      secciones 1 a 5 de este registro y **generar el PDF**. Ojo: `xelatex`
+      **no está instalado** en este equipo; si se va por LaTeX, compilar en
+      línea con **Overleaf** (subiendo `main.tex` + `imagenes/`) o instalar
+      TeX Live (`sudo dnf install texlive-xetex texlive-spanish` en Fedora).
 - [ ] Poner la **fecha de entrega** real en la portada.
 - [ ] Elegir 5–8 filas de las tablas de la sección 3 (copiar la salida real).
 - [ ] Decidir si la tabla de evidencia del factorial se queda en ensamblador

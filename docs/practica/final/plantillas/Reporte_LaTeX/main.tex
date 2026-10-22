@@ -1,0 +1,1089 @@
+% !TeX program = xelatex
+\documentclass[11pt,letterpaper,oneside]{article}
+
+% ---------- Codificación e idioma ----------
+% inputenc y fontenc NO se usan con XeLaTeX (maneja UTF-8 de forma nativa)
+\usepackage[spanish,es-tabla]{babel}
+% lmodern no disponible en algunos entornos; mathptmx + helvet sustituyen tipografias
+
+% ---------- Tipografía estilo plantilla UV ----------
+% La plantilla original usa Gill Sans para títulos y Times New Roman para cuerpo.
+% Se aproxima con paquetes libres ampliamente disponibles.
+\usepackage{mathptmx}                 % Times-like body text
+\usepackage[scaled=0.92]{helvet}      % Helvetica-like (sustituye Gill Sans en títulos)
+
+% ---------- Geometría (acorde a la plantilla UV) ----------
+\usepackage[
+  letterpaper,
+  top=2.5cm,
+  bottom=2.5cm,
+  left=3cm,
+  right=2.5cm,
+  headheight=15pt
+]{geometry}
+
+% ---------- Interlineado 21 pts ≈ 1.5 ----------
+\usepackage{setspace}
+\setstretch{1.4}
+
+% ---------- Paquetes auxiliares ----------
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{float}
+
+% ---------- Colores institucionales (azul y verde UV) ----------
+\definecolor{uvblue}{RGB}{30,89,150}
+\definecolor{uvgreen}{RGB}{80,165,86}
+\definecolor{uvgray}{RGB}{90,90,90}
+\definecolor{lightbg}{RGB}{245,247,250}
+
+% ---------- Hipervínculos ----------
+\hypersetup{
+  colorlinks=true,
+  linkcolor=uvblue,
+  citecolor=uvblue,
+  urlcolor=uvblue,
+  pdftitle={Reporte de Desarrollo de Software - NetPro},
+  pdfauthor={Equipo NetPro - Universidad Veracruzana}
+}
+
+% ---------- Estilo de títulos (Gill Sans-like + uvblue) ----------
+\titleformat{\section}
+  {\sffamily\Large\bfseries\color{uvblue}}
+  {\thesection.}{0.6em}{}
+\titleformat{\subsection}
+  {\sffamily\large\bfseries\color{uvblue!85!black}}
+  {\thesubsection}{0.5em}{}
+\titleformat{\subsubsection}
+  {\sffamily\normalsize\bfseries\color{uvgray}}
+  {\thesubsubsection}{0.4em}{}
+\titlespacing*{\section}{0pt}{1.6em}{0.8em}
+\titlespacing*{\subsection}{0pt}{1.2em}{0.5em}
+\titlespacing*{\subsubsection}{0pt}{0.9em}{0.4em}
+
+% ---------- Encabezado y pie de página estilo UV ----------
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\fancyfoot[L]{\footnotesize\color{uvgray}\itshape ``Lis de Veracruz: Arte, Ciencia, Luz''}
+\fancyfoot[R]{\footnotesize\color{uvblue}\textbf{www.uv.mx}}
+\fancyfoot[C]{\footnotesize\color{uvgray}\thepage}
+
+% ---------- Cajas de información ----------
+\newtcolorbox{infobox}[1][]{
+  colback=lightbg,
+  colframe=uvblue,
+  boxrule=0.4pt,
+  arc=2pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,
+  fonttitle=\sffamily\bfseries\color{white},
+  coltitle=white,
+  colbacktitle=uvblue,
+  #1
+}
+
+\newtcolorbox{requisito}[1][]{
+  enhanced,
+  colback=lightbg,
+  colframe=uvgreen!75!black,
+  boxrule=0.4pt,
+  arc=2pt,
+  left=6pt,right=6pt,top=4pt,bottom=4pt,
+  #1
+}
+
+% ---------- Listings para código ----------
+\lstdefinelanguage{netpro}{
+  morekeywords={device,type,conectar,medio,wall,obstaculo,bandwidth,network,speed,
+                router,switch,firewall,pc,laptop,server,wifi,tablet,
+                fiber,copper,wireless,at,size,material,grosor,gbps,mbps,true,false},
+  morecomment=[l]{//},
+  morestring=[b]",
+  sensitive=true
+}
+\lstset{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{uvblue}\bfseries,
+  commentstyle=\color{uvgreen!60!black}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{uvgray},
+  numbersep=8pt,
+  frame=single,
+  framerule=0.3pt,
+  rulecolor=\color{uvgray!40},
+  backgroundcolor=\color{lightbg},
+  breaklines=true,
+  breakatwhitespace=true,
+  showstringspaces=false,
+  tabsize=2,
+  captionpos=b,
+  xleftmargin=12pt,
+  xrightmargin=4pt,
+  aboveskip=10pt,
+  belowskip=10pt
+}
+
+% ---------- Pie de figura ----------
+\captionsetup{font=small,labelfont={bf,sf,color=uvblue},labelsep=period,
+              format=plain,justification=centering}
+
+% ---------- Comando: figura centrada con marco ----------
+\newcommand{\figura}[3][0.85\textwidth]{%
+  \begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=#1]{#2}}
+    \caption{#3}
+  \end{figure}
+}
+
+% =============================================================
+%                          DOCUMENTO
+% =============================================================
+\begin{document}
+
+
+
+% ============== ÍNDICE ==============
+\pagenumbering{roman}
+\setcounter{page}{2}
+{\sffamily
+  \renewcommand{\contentsname}{\color{uvblue}\Large\bfseries Índice}
+  \tableofcontents
+}
+\newpage
+
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+% =============================================================
+%                       1. INTRODUCCIÓN
+% =============================================================
+\section{Introducción}
+
+\subsection{Objetivo de la actividad de aprendizaje}
+
+Diseñar y documentar un reporte detallado del desarrollo de un proyecto de software utilizando la metodología en cascada, aplicando sus fases secuenciales (análisis de requisitos, diseño, implementación, pruebas y despliegue) para resolver un problema administrativo o técnico específico.
+
+\subsection{Descripción del aprendizaje a obtener}
+
+A través de esta actividad el equipo consolida competencias clave de la ingeniería de software:
+
+\begin{itemize}[leftmargin=1.5em,itemsep=2pt]
+  \item \textbf{Aplicación rigurosa de la metodología en cascada}, comprendiendo cuándo es apropiada y qué riesgos implica su naturaleza secuencial.
+  \item \textbf{Levantamiento y trazabilidad de requisitos} funcionales y no funcionales, asegurando la coherencia entre la necesidad del usuario y la implementación final.
+  \item \textbf{Diseño arquitectónico} en capas (presentación, lógica y persistencia).
+  \item \textbf{Modelado UML} de casos de uso, secuencia y clases para comunicar el diseño antes de codificar.
+  \item \textbf{Trabajo colaborativo} con asignación clara de roles, planificación de reuniones y uso de un repositorio compartido.
+  \item \textbf{Diseño y ejecución de pruebas} de funcionalidad, integración y de tipo \emph{negative testing} para validar la robustez del sistema.
+\end{itemize}
+
+% =============================================================
+%                  2. DESGLOSE DE TEMAS
+% =============================================================
+\section{Desglose de temas para aprender}
+
+\subsection{Requerimientos}
+
+\subsubsection{Plan de negocio}
+
+El sector educativo y profesional de redes enfrenta una limitante constante: las herramientas existentes son propietarias, requieren licencia (Cisco Packet Tracer) o son demasiado complejas para uso académico (GNS3). \textbf{NetPro} se posiciona como una alternativa libre, ligera y enfocada en la ingeniería de software de redes que la hace adoptable en laboratorios universitarios y entornos corporativos.
+
+\paragraph{Propuesta de valor.} Permitir el diseño de redes mediante un lenguaje descriptivo similar a Terraform o GraphViz, con renderizado automático y feedback inmediato, evitando la curva de aprendizaje de las interfaces gráficas tradicionales y promoviendo la adopción de prácticas de \emph{Infrastructure as Code} en el ámbito de la ingeniería de redes.
+
+\paragraph{Roles del equipo.}
+\begin{itemize}[leftmargin=1.5em,itemsep=2pt]
+  \item \textbf{Yadid Asiel Soto Hernández:} Jefe de Producción, Arquitecto de Software, Administrador del Proyecto e Ingeniero de Requisitos. Definió la arquitectura \emph{State-Driven}, configuró Docker y gestionó el repositorio en GitHub Projects.
+  \item \textbf{Miguel Alejandro Damián Bumas:} Programador. Desarrolló los algoritmos de VLSM, y los modelos UML.
+  \item \textbf{José de Jesús Berman Islas:} Ingeniero de Pruebas.
+  \item \textbf{Julio César Gómez Cuéllar:} Diseñador del Software. Maquetó las interfaces con Figma.
+\end{itemize}
+
+\subsubsection{Veinte requisitos del sistema}
+
+A continuación se presenta una selección representativa de los 20 requisitos identificados, distribuidos por módulo del sistema:
+
+\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{@{}>{\bfseries\color{uvblue}}p{1.5cm} p{2.5cm} p{9cm}@{}}
+\caption{Requisitos funcionales y no funcionales principales}\label{tab:reqs}\\
+\toprule
+\textbf{ID} & \textbf{Módulo} & \textbf{Descripción}\\
+\midrule
+\endfirsthead
+\toprule
+\textbf{ID} & \textbf{Módulo} & \textbf{Descripción}\\
+\midrule
+\endhead
+RF-01 & Login           & El sistema valida credenciales comparando el hash almacenado en \texttt{DB\_Usuarios} mediante Bcrypt/Argon2.\\
+RF-02 & Login           & Tras autenticar, se redirige al usuario según su rol (RBAC): Ingeniero al \emph{Dashboard}, Supervisor al \emph{Monitor}.\\
+RF-03 & Dashboard       & Renderiza una cuadrícula de proyectos con previsualización gráfica generada desde el JSON de cada topología.\\
+RF-04 & Dashboard       & Permite crear, copiar y eliminar proyectos con confirmación de seguridad para acciones destructivas.\\
+RF-05 & Workspace       & Presenta una pantalla dual: Editor de Código (Monaco) a la izquierda y Visualizador de Red (React Flow) a la derecha.\\
+RF-06 & Workspace       & Renderiza dinámicamente la topología al detectar cambios en el código mediante \emph{debounce} de 500\,ms.\\
+RF-07 & Workspace       & Soporta nodos: PC, switch, router, firewall, server, AP Wi-Fi, laptop y tablet, cada uno con atributos técnicos.\\
+RF-08 & Workspace       & Genera un nuevo registro inmutable en la tabla \texttt{VERSION} (formato \texttt{vX.Y.Z}) al guardar.\\
+RF-09 & Editor de Nodos & Calcula automáticamente subredes con el algoritmo VLSM, validando máscara, broadcast y rango útil.\\
+RF-10 & Simulación      & Ejecuta pruebas de conectividad (ping ICMP), TCP y UDP con tamaño de paquete configurable.\\
+RF-11 & Simulación      & Calcula latencia, pérdida de paquetes y ancho de banda efectivo según medio (cobre, fibra, inalámbrico).\\
+RF-12 & Reporte         & Genera un PDF descargable con las métricas de la simulación vinculado al \texttt{id\_proyecto}.\\
+RF-13 & Monitor         & El supervisor visualiza usuarios registrados con filtros por rol y nombre.\\
+RF-14 & CRUD Usuarios   & Permite crear, modificar y eliminar cuentas asignando roles (Ingeniero, Supervisor, Superadmin).\\
+RF-15 & Logs            & Lista las acciones críticas con formato \texttt{[Dispositivo]-[Cambio]-[Anterior]-[Nuevo]}.\\
+\midrule
+RNF-01 & Arquitectura  & El sistema opera bajo un modelo \emph{State-Driven} con Zustand como gestor de estado global.\\
+RNF-02 & UI            & La interfaz se construye con Tailwind CSS siguiendo una estética oscura, profesional y consistente.\\
+RNF-03 & Portabilidad  & La aplicación se despliega como contenedor Docker y se empaqueta como ejecutable nativo con Tauri.\\
+RNF-04 & Seguridad     & Las contraseñas se almacenan únicamente como hash; nunca se procesa texto plano.\\
+RNF-05 & Trazabilidad  & Cada cambio técnico queda vinculado a un \texttt{id\_version} para reconstruir la evolución del diseño.\\
+\bottomrule
+\end{longtable}
+
+\subsubsection{Diseño preliminar del software}
+
+El diseño visual y conceptual se presentó al equipo en una sesión específica. La identidad gráfica utiliza una paleta oscura con acentos azul cian (\#0E7C99), íconos SVG escalables para cada dispositivo y un layout en paneles divididos para maximizar el área útil de trabajo. La iconografía técnica\textemdash{}routers, switches, PCs, APs Wi-Fi\textemdash{}se diseñó internamente para mantener nitidez en cualquier nivel de zoom.
+[Agregar PowerPoint]
+
+\subsection{Diseño arquitectónico}
+
+\begin{figure}[H]
+\centering
+\fbox{\includegraphics[width=0.7\textwidth,height=0.85\textheight,keepaspectratio]{imagenes/arq_general.png}}
+\caption{Arquitectura general de NetPro: flujo de carga de proyecto desde el Dashboard hacia el Workspace bajo el modelo \emph{State-Driven}.}
+\label{fig:arq}
+\end{figure}
+
+NetPro Engine se organiza en \textbf{tres capas} que se comunican mediante un esqueleto de integración basado en FastAPI:
+
+\paragraph{Capa de Presentación (Frontend).} Construida con \textbf{React} y \textbf{Tailwind CSS}, divide su responsabilidad en dos módulos según el rol: \emph{engineer} (vistas de diseño, simulación y reportes) y \emph{admin} (vistas de auditoría, monitor y CRUD de usuarios). El estado global se gestiona con \textbf{Zustand}, que actúa como puente único de sincronización entre el Editor de Código (EDC) y la Pantalla Visual (PV).
+
+\paragraph{Capa de Lógica (Backend).} Implementada en \textbf{Python} sobre \textbf{FastAPI}, contiene tres componentes especializados:
+\begin{itemize}[leftmargin=1.5em,itemsep=2pt]
+  \item \textbf{TC + V (Traductor y Validador):} convierte el código \texttt{.netpro} a un objeto JSON y verifica reglas de ingeniería (compatibilidad de medios, IPs válidas, ausencia de bucles).
+  \item \textbf{ALE (Auto-Layout Engine):} calcula coordenadas \texttt{(x, y)} para cada dispositivo usando el algoritmo de Dagre, evitando solapamientos y cruces innecesarios.
+  \item \textbf{NetPro Engine:} motor de simulación que calcula latencia, pérdida de paquetes y \emph{throughput} efectivo en función del medio, distancia y obstáculos físicos.
+\end{itemize}
+
+\paragraph{Capa de Persistencia (Datos).} \textbf{PostgreSQL} con dos esquemas: \texttt{DB\_Usuarios} (gestión de credenciales y RBAC) y \texttt{DB\_Proyectos} (esquemas JSON, historial de versiones, reportes y logs). Los archivos JSON se mantienen como \emph{Single Source of Truth} y se respaldan en disco para resiliencia.
+
+\paragraph{Pipeline de transformación.} El flujo de datos es unidireccional y reactivo:
+
+Cada vez que el usuario deja de escribir 500\,ms (\emph{debounce}), se dispara la traducción y validación; si hay éxito el ALE calcula las nuevas posiciones y React Flow actualiza el lienzo suavemente; si hay error se marcan las líneas afectadas en el editor.
+
+\subsection{Diseño UML}
+
+\subsubsection{Casos de uso}
+
+Los actores del sistema son dos: el \textbf{Ingeniero}, que diseña, simula y obtiene reportes; y el \textbf{Supervisor}, que audita actividad, gestiona usuarios y revisa el historial técnico. Los principales casos de uso del Ingeniero son: \emph{Iniciar Sesión, Crear Proyecto, Editar Topología, Calcular VLSM, Ejecutar Simulación, Generar Reporte}. Los del Supervisor: \emph{Iniciar Sesión, Monitorear Usuarios, Administrar CRUD, Auditar Logs, Comparar Versiones}.
+
+\begin{figure}[H]
+\centering
+\fbox{\includegraphics[width=0.5\textwidth,height=0.82\textheight,keepaspectratio]{imagenes/uml_login.png}}
+\caption{Diagrama de actividad del caso de uso \emph{Iniciar Sesión} con autenticación por hash.}
+\label{fig:uml-login}
+\end{figure}
+
+\subsubsection{Diagramas de secuencia}
+
+\begin{figure}[H]
+\centering
+\fbox{\includegraphics[width=0.7\textwidth,height=0.8\textheight,keepaspectratio]{imagenes/uml_engine.png}}
+\caption{Diagrama de secuencia del motor NetPro Engine al ejecutar una simulación de tráfico.}
+\label{fig:uml-engine}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\fbox{\includegraphics[width=0.78\textwidth,height=0.8\textheight,keepaspectratio]{imagenes/uml_state.png}}
+\caption{Diagrama de la arquitectura \emph{State-Driven} aplicada a la sincronización entre simulador y workspace.}
+\label{fig:uml-state}
+\end{figure}
+
+\subsubsection{Diagrama de clases (núcleo VLSM)}
+
+El módulo de cálculo de subredes implementa el método VLSM siguiendo un diseño orientado a objetos modular:
+
+\begin{figure}[H]
+\centering
+\fbox{\includegraphics[width=0.55\textwidth,height=0.82\textheight,keepaspectratio]{imagenes/uml_vlsm.png}}
+\caption{Diagrama UML del flujo de cálculo VLSM en el Editor de Nodos.}
+\label{fig:uml-vlsm}
+\end{figure}
+
+\subsection{Implementación}
+
+\subsubsection{Plan de implementación}
+
+El plan se estructuró en \textbf{cinco \emph{sprints} secuenciales} alineados con la metodología en cascada:
+
+\begin{enumerate}[leftmargin=1.5em,itemsep=2pt]
+  \item \textbf{Sprint 1 (Infraestructura):} configuración de Docker Compose, PostgreSQL, esqueleto FastAPI y bootstrap de React.
+  \item \textbf{Sprint 2 (Núcleo lógico):} implementación de los algoritmos de VLSM, conversión Bitrate--Baudios y modelos de latencia/atenuación.
+  \item \textbf{Sprint 3 (Frontend técnico):} integración de Monaco Editor, React Flow, Zustand y maquetación con Tailwind.
+  \item \textbf{Sprint 4 (Pipeline de datos):} desarrollo del Traductor, Validador y Auto-Layout Engine; conexión EDC--PV con \emph{debounce}.
+  \item \textbf{Sprint 5 (Empaquetado):} integración de Tauri para generar el ejecutable de escritorio nativo.
+\end{enumerate}
+
+\subsubsection{Estructura del proyecto}
+
+\begin{lstlisting}[language=bash,caption={Estructura de carpetas del repositorio},captionpos=b]
+netpro-app/
+| -- backend/             # Capa de logica (Python + FastAPI)
+|    |-- app/
+|    |   |-- core/        # Modulos de calculos
+|    |   |-- engine/      # NetPro Engine (TC, V, ALE)
+|    |   `-- main.py      # Punto de entrada FastAPI
+|    `-- persistence/     # Capa de datos (jsons + postgres)
+|-- frontend/             # Capa de presentacion (React + Tailwind)
+|   `-- src/
+|       |-- modules/      # Vistas por rol (admin, engineer)
+|       |-- components/   # Componentes compartidos
+|       |-- store/        # Zustand stores
+|       `-- assets/       # Iconografia SVG (JSONIC)
+|-- src-tauri/            # App de escritorio (Rust)
+|-- infra/                # Docker compose y scripts
+`-- tests/                # Pruebas unitarias e integracion
+\end{lstlisting}
+
+\subsubsection{Lenguaje de dominio específico (DSL)}
+
+Una de las decisiones de diseño más relevantes fue desarrollar un DSL propio (\texttt{.netpro}) que permite describir topologías de manera declarativa:
+
+\begin{lstlisting}[language=netpro,caption={Ejemplo de código \texttt{.netpro}: topología completa con simulación},captionpos=b]
+// --- CONFIGURACION DE INFRAESTRUCTURA ---
+device R1 type router { label: "Core_Router", ip: "192.168.1.1" }
+device SW1 type switch { label: "Distribucion", port_speed: 1000 }
+device PC_Finanzas type pc { ip: "10.0.0.5", mask: "255.255.255.0" }
+
+// Punto de acceso inalambrico
+device AP1 type wifi { label: "AP_Despejado", ip: "192.168.10.1" }
+device TBL1 type tablet { label: "Tablet_Rapida", ip: "192.168.10.2" }
+
+// --- ENLACES FISICOS ---
+conectar R1 a SW1 medio fiber { animated: true }
+conectar SW1 a PC_Finanzas medio copper { length: "15m" }
+conectar AP1 a TBL1 medio wireless
+
+// --- OBSTACULO FISICO ---
+wall MURO1 at 30,40 size 40x3 material concreto grosor 20
+
+// --- SIMULACION ---
+network speed wireless 100 mbps
+simulate ping from PC_Finanzas to R1
+\end{lstlisting}
+
+\subsubsection{Evidencia de ejecución}
+
+A continuación se muestra la evidencia de las funcionalidades operativas del sistema:
+
+\figura{imagenes/impl_login.png}{Pantalla de login con credenciales de prueba (\texttt{IngPrueba}).}
+
+\figura{imagenes/impl_workspace.png}{Workspace de NetPro: a la izquierda el editor DSL con resaltado de sintaxis, a la derecha el lienzo visual con la topología renderizada en tiempo real, incluyendo obstáculos físicos (muros) que afectan la propagación inalámbrica.}
+
+\figura{imagenes/impl_simulacion.png}{Pantalla de simulación con confirmación de acción destructiva (limpiar logs y reporte) y panel inferior con el flujo de paquetes en tiempo real.}
+
+\figura{imagenes/impl_reporte2.png}{Reporte de simulación generado por el sistema con gráficos comparativos de latencia y saltos por paquete, métricas finales (ancho de banda efectivo, latencia promedio, paquetes perdidos) y opción de exportación a PDF.}
+
+\subsection{Pruebas}
+
+\subsubsection{Plan de pruebas}
+
+El plan de pruebas del Ingeniero José de Jesús Berman Islas comprendió cuatro categorías:
+
+\begin{requisito}
+\sffamily\small
+\textbf{Categorías de prueba}
+\begin{enumerate}[leftmargin=1.5em,itemsep=2pt,topsep=2pt]
+  \item \textbf{Pruebas de funcionalidad:} validar que cada requisito (RF-01 a RF-15) se cumple según la especificación.
+  \item \textbf{Pruebas de integración:} verificar la comunicación entre frontend, backend y persistencia, incluyendo el ciclo \emph{State-Driven} entre EDC y PV.
+  \item \textbf{Pruebas de seguridad y estrés (\emph{negative testing}):} introducir datos inválidos (IPs malformadas, máscaras incorrectas, ciclos en la topología) y verificar que el sistema responde con mensajes de error claros sin caer.
+  \item \textbf{Validación algorítmica:} contrastar los resultados de VLSM y los modelos de latencia contra estándares profesionales (RFC 1878, IEEE 802.11).
+\end{enumerate}
+\end{requisito}
+
+\subsubsection{Casos de prueba ejecutados}
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{@{}>{\bfseries\color{uvblue}}p{1.4cm} p{4.5cm} p{4cm} p{3.2cm}@{}}
+\caption{Bitácora de casos de prueba ejecutados}\label{tab:tests}\\
+\toprule
+\textbf{ID} & \textbf{Caso de prueba} & \textbf{Resultado esperado} & \textbf{Estado}\\
+\midrule
+\endfirsthead
+\toprule
+\textbf{ID} & \textbf{Caso de prueba} & \textbf{Resultado esperado} & \textbf{Estado}\\
+\midrule
+\endhead
+TP-01 & Login con credenciales válidas       & Acceso concedido                 & \color{uvgreen!70!black}\bfseries Aprobado\\
+TP-02 & Login con credenciales inválidas     & Mensaje de error                 & \color{uvgreen!70!black}\bfseries Aprobado\\
+TP-03 & Crear proyecto                       & Registro nuevo en BD             & \color{uvgreen!70!black}\bfseries Aprobado\\
+TP-04 & Duplicar proyecto                    & Copia con sufijo \texttt{(1)}    & \color{red!75!black}\bfseries Defecto detectado\\
+TP-05 & Renderizado dinámico DSL             & Topología actualizada en \textless 500\,ms & \color{uvgreen!70!black}\bfseries Aprobado\\
+TP-06 & Cálculo VLSM (192.168.1.0/24, 4 sub) & Subredes /26 correctas           & \color{uvgreen!70!black}\bfseries Aprobado\\
+TP-07 & IP inválida en editor                & Mensaje claro, sin guardado      & \color{uvgreen!70!black}\bfseries Aprobado\\
+TP-08 & Ping con obstáculo de concreto       & Latencia incrementada            & \color{uvgreen!70!black}\bfseries Aprobado\\
+TP-09 & Simulación de saturación TCP         & Pérdida de paquetes detectada    & \color{uvgreen!70!black}\bfseries Aprobado\\
+TP-10 & Generación PDF de reporte            & PDF con métricas correctas       & \color{uvgreen!70!black}\bfseries Aprobado\\
+\bottomrule
+\end{longtable}
+
+\subsubsection{Defectos encontrados y observaciones}
+
+\figura{imagenes/prueba_dashboard.png}{\textbf{TP-04 (Defecto):} Al crear dos proyectos con el mismo nombre se mantienen idénticos, generando confusión. \emph{Recomendación:} adjuntar un sufijo \texttt{(\#)} o validar la unicidad antes de aceptar el guardado.}
+
+\figura{imagenes/prueba_workspace.png}{\textbf{TP-04 (continuación):} Al abrir el proyecto duplicado no se carga la información del proyecto principal; el editor aparece vacío.}
+
+\subsection{Mantenimiento}
+
+\subsubsection{Plan de mantenimiento}
+
+El plan se divide en tres líneas de acción:
+
+\begin{itemize}[leftmargin=1.5em,itemsep=2pt]
+  \item \textbf{Mantenimiento correctivo:} resolución de los defectos detectados durante las pruebas (en particular TP-04 sobre duplicación de proyectos) y atención de \emph{issues} reportados por usuarios mediante GitHub Issues.
+  \item \textbf{Mantenimiento adaptativo:} actualización periódica de las dependencias críticas (React, FastAPI, Tauri, PostgreSQL).
+  \item \textbf{Mantenimiento perfectivo:} incorporación de nuevos dispositivos al catálogo (teléfonos IP, impresoras, cámaras IP), nuevos medios físicos (fibra multimodo OM5) y mejoras en el algoritmo de auto-layout.
+\end{itemize}
+
+\paragraph{Periodicidad propuesta.} Revisiones menores cada dos semanas (corrección de \emph{bugs}), mayores cada tres meses (nuevas funcionalidades), y de seguridad de manera inmediata ante cualquier CVE crítico que afecte a la pila tecnológica.
+
+% =============================================================
+%                  3. ARTEFACTO DE SOFTWARE
+% =============================================================
+\section{Descripción del artefacto de software}
+
+\subsection{Descripción general}
+
+\textbf{NetPro Engine} es una aplicación de escritorio multiplataforma\textemdash{}distribuida como ejecutable nativo gracias a Tauri\textemdash{} que permite a ingenieros y estudiantes diseñar, validar y simular topologías de red mediante un lenguaje de dominio específico. La aplicación cuenta con once pantallas funcionales agrupadas en tres módulos: \emph{Acceso y Seguridad}, \emph{Diseño de Red} (rol Ingeniero) y \emph{Administración} (rol Supervisor).
+
+\textbf{Características técnicas relevantes:}
+\begin{itemize}[leftmargin=1.5em,itemsep=2pt]
+  \item Lenguaje DSL con verbos en español (\texttt{device}, \texttt{conectar}, \texttt{wall}, \texttt{simulate}).
+  \item Soporte para 8 tipos de dispositivos y 3 medios de transmisión.
+  \item Modelo físico con 6 materiales (\emph{drywall}, madera, vidrio, ladrillo, concreto, metal) y atenuación calculada en dB/cm.
+  \item Versionado inmutable con formato \texttt{vX.Y.Z}.
+  \item Auditoría completa con \emph{logs} estructurados.
+\end{itemize}
+
+\subsection{Capturas de pantalla por funcionalidad}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/func_login.png}}
+  \caption{Pantalla 01 — Login}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/func_dashboard.png}}
+  \caption{Pantalla 02 — Dashboard de Proyectos}
+\end{subfigure}
+\caption{Módulo de acceso y dashboard del Ingeniero.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\fbox{\includegraphics[width=0.85\textwidth]{imagenes/func_workspace.png}}
+\caption{Pantalla 03 — Workspace: editor DSL y lienzo visual sincronizados.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/func_editor.png}}
+  \caption{Pantalla 04 — Editor de Nodos / VLSM}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/func_reporte.png}}
+  \caption{Pantalla 06 — Reporte de Simulación}
+\end{subfigure}
+\caption{Herramientas de configuración y reporte técnico.}
+\end{figure}
+
+
+% =============================================================
+%               Reflexiones
+% =============================================================
+
+\section{Reflexiones por integrantes del equipo}
+
+\begin{enumerate}[leftmargin=1.5em,itemsep=2pt]
+  \item \textbf{Yadid Asiel Soto Hernández}
+  La practica fue muy buena. En principal el mayor factor para salir de la comodidad y aprender mas sobre como manejar un equipo, la importancia de la asignación de los roles y el cumplimiento de sus funciones fue el hecho de hacer algo a lo que no estaba acostumbrado. Hacer un Software el cual se veía mucho mas difícil de lo que yo u otros miembros de mi equipo podrían hacer me hizo realizar mas de lo que yo mismo creía que seria capaz en un corto periodo de tiempo, mucho mejor que haber hecho un software simple para entregar una actividad. Esta practica la disfrute y siento que exprimí todo el valor académico que me podía dar. 
+  \item \textbf{Jose de Jesus Berman Islas}
+  Por mi parte creo que este proyecto ha sido un éxito, no solamente por que cumplimos con todos los parámetros determinados por el docente si no también por qué estamos satisfechos con el resultado de nuestro software, nosotros sabíamos que era posible entregar un software mucho más simple pero no nos limitamos a algo tan sencillo con tal de "pasar la materia". El hecho de rebasar lo que se considera "suficiente" nos hizo trabajar mucho más enfocados y con ello sentirnos más satisfechos con el resultado. Por lo que puedo determinar que este proyecto nos hizo desarrollar habilidades personales (ya sea de programación o diseño) así como también habilidades de trabajo en equipo (como la organización) útiles para siguientes actividades o proyectos.
+Gracias a mi equipo por ser tan bueno.
+\item \textbf{Julio Cesar Gomez Cuellar}
+La verdad, me siento muy satisfecho con el resultado final y con cómo se dio toda la dinámica de este proyecto desde el día uno. Armar un equipo para sacar adelante algo como NETPRO no siempre es fácil, pero esta vez nos acoplamos súper bien y logramos un trabajo excelente. Me gustó mucho que cada quien entendió su rol, se hizo 100 responsable de la parte que le tocaba y la ejecutaron de maravilla. Eso nos quitó un peso de encima a todos porque sabíamos que podíamos confiar en los demás.
+\item \textbf{Miguel Damian Bumas}
+Participar en el desarrollo de NetPro representó un punto de inflexión en mi forma de concebir la creación de software, exigiéndome pasar de la escritura de código funcional básico a la estructuración de una arquitectura completa. Asumir la responsabilidad del backend me enfrentó al desafío directo de traducir conceptos de redes a lógica programable, específicamente mediante la implementación en Python con FastAPI.
+Desde la perspectiva metodológica, el enfoque en cascada demostró su inmenso valor. Al ser también responsable de los modelos UML, me di cuenta de que invertir tiempo en diagramar las clases y los casos de uso antes de iniciar la programación fue la clave para evitar refactorizaciones severas. Documentar y modelar el flujo de datos previamente hizo que la integración de la lógica con el estado global de la aplicación fluyera con naturalidad. Esta práctica me deja como lección principal que la ingeniería de software profesional depende tanto de la planeación y el diseño estructurado como de la codificación misma.
+
+Fue justamente gracias a esa dedicación, a que nadie dejó las cosas a medias y al compromiso de cada uno, que pudimos hacer realidad el proyecto tal y como lo teníamos planeado, e incluso diría que quedó mucho mejor de lo que esperábamos al inicio. Sinceramente, no tengo ni una sola queja ni del proceso ni de ningún compañero; siempre hubo muy buena comunicación, nos apoyamos en todo momento y el trabajo fluyó sin problemas. Me quedo con una muy buena experiencia y definitivamente es el tipo de equipo con el que da gusto trabajar.
+  
+\end{enumerate}
+
+% =============================================================
+%               4. EVIDENCIAS DE TRABAJO EN EQUIPO
+% =============================================================
+\section{Evidencias de trabajo en equipo}
+
+\subsection{Reunión 1 — 8 de abril de 2026}
+
+\textbf{Modalidad:} presencial. \textbf{Tema:} arranque del proyecto, lluvia de ideas y asignación inicial de roles. \textbf{Acuerdos:} establecer el repositorio compartido, definir el alcance mínimo (MVP) y agendar reuniones semanales en Discord.
+
+\begin{figure}[H]
+\centering
+\fbox{\includegraphics[width=0.7\textwidth]{imagenes/equipo2.jpg}}
+\caption{Reunión presencial inicial del equipo NetPro.}
+\end{figure}
+
+\subsection{Reunión 2 — 14 de abril de 2026}
+
+\textbf{Modalidad:} virtual (Discord). \textbf{Tema:} avances verificados de la versión 0.1, definición de la arquitectura \emph{State-Driven} y asignación de tareas técnicas detalladas.
+
+\begin{figure}[H]
+\centering
+\fbox{\includegraphics[width=0.55\textwidth]{imagenes/equipo1.jpg}}
+\caption{Reunión virtual del 14/04/2026: avances verificados (Versión 0.1).}
+\end{figure}
+
+\subsection{Reunión 3 — 2 de mayo de 2026}
+
+\textbf{Modalidad:} presencial. \textbf{Tema:} integración de módulos, revisión del pipeline de datos EDC--PV y validación de los algoritmos VLSM.
+
+\begin{figure}[H]
+\centering
+\fbox{\includegraphics[width=0.7\textwidth]{imagenes/equipo3.jpg}}
+\caption{Sesión de integración presencial del 02/05/2026.}
+\end{figure}
+
+\subsection{Reunión 4 — 3 de mayo de 2026}
+
+\textbf{Modalidad:} presencial. \textbf{Tema:} cierre del proyecto, y revisión final del reporte técnico.
+
+\begin{figure}[H]
+\centering
+\fbox{\includegraphics[width=0.7\textwidth]{imagenes/equipo4.jpg}}
+\caption{Sesión de cierre y revisión final del 03/05/2026.}
+\end{figure}
+
+% =============================================================
+%         4.5 REPORTE DE HORAS POR INTEGRANTE
+% =============================================================
+\subsection{Reporte de horas por integrante}
+
+Cada integrante del equipo registró sus horas de trabajo mediante comentarios en los \emph{issues} del repositorio de GitHub Projects, indicando hora de inicio, hora de finalización y una breve descripción de la actividad realizada. A continuación se presenta el resumen consolidado y las evidencias por cada miembro.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{@{}p{5.5cm} >{\centering\arraybackslash}p{3cm} >{\centering\arraybackslash}p{3.5cm}@{}}
+\caption{Resumen de horas totales por integrante}\label{tab:horas-resumen}\\
+\toprule
+\textbf{Integrante} & \textbf{Rol principal} & \textbf{Horas registradas}\\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Integrante} & \textbf{Rol principal} & \textbf{Horas registradas}\\
+\midrule
+\endhead
+Julio César Gómez Cuéllar      & Diseñador        & 22.0\,h\\
+Yadid Asiel Soto Hernández     & Arquitecto / JP  & 24.5\,h\\
+Miguel Alejandro Damián Bumas  & Programador      & 26.0\,h\\
+José de Jesús Berman Islas     & Ing.\ de Pruebas & 20.5\,h\\
+\midrule
+\multicolumn{2}{l}{\textbf{Total acumulado del equipo}} & \textbf{93.0\,h}\\
+\bottomrule
+\end{longtable}
+
+% ---------- JULIO ----------
+\subsubsection{Julio César Gómez Cuéllar — Diseñador del Software}
+
+Julio fue responsable del diseño visual completo de la aplicación en Figma. Su trabajo abarcó la maquetación de las once pantallas técnicas distribuidas en dos fases (Rol 1 y Rol 2), incluyendo la interfaz de login, el dashboard de proyectos, el workspace con editor y visualizador, la consola de simulación, el reporte de resultados y las pantallas del módulo administrativo (monitor de usuarios, CRUD, logs y comparador de versiones).
+
+\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{@{}>{\bfseries\color{uvblue}}p{1.2cm} p{2.2cm} p{5.8cm} >{\centering\arraybackslash}p{2cm}@{}}
+\caption{Bitácora de horas — Julio César Gómez Cuéllar}\label{tab:horas-julio}\\
+\toprule
+\textbf{Día} & \textbf{Horario} & \textbf{Actividad} & \textbf{Horas}\\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Día} & \textbf{Horario} & \textbf{Actividad} & \textbf{Horas}\\
+\midrule
+\endhead
+14/04 & 08:00--14:00 & Diseño de pantallas de visualización de red, consola de simulación y reporte (Figma, Issue \#10). & 6.0\\
+14/04 & 14:30--16:30 & Avance de pantalla de supervisión y logs del supervisor. & 2.0\\
+15/04 & 09:00--13:00 & Diseño de pantallas Rol 2: monitor de usuarios, CRUD de usuarios y administración. & 4.0\\
+22/04 & 13:02--18:00 & Construcción de pantallas con nuevo plan de diseño; ajuste de componentes reutilizables. & 5.0\\
+28/04 & 08:00--11:00 & Iteración sobre pantallas de login, dashboard y workspace con retroalimentación del equipo. & 3.0\\
+02/05 & 14:00--16:00 & Correcciones finales a las pantallas de reporte y logs de auditoría. & 2.0\\
+\midrule
+\multicolumn{3}{r}{\textbf{Total}} & \textbf{22.0}\\
+\bottomrule
+\end{longtable}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas01.png}}
+  \caption{Issue \#10: inicio del diseño de la pantalla de visualización de datos de red (14/04).}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas02.png}}
+  \caption{Avance de la consola de simulación de red en Figma (14/04).}
+\end{subfigure}
+\caption{Evidencia de horas — Julio C. Gómez: diseño de pantallas técnicas Rol 1, parte 1.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas03.png}}
+  \caption{Avance de pantalla de reporte de simulación con gráficos (14/04).}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas04.png}}
+  \caption{Iteración sobre pantallas de login y splash screen; hora de fin documentada (último mes).}
+\end{subfigure}
+\caption{Evidencia de horas — Julio C. Gómez: diseño de pantallas técnicas Rol 1, parte 2.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas05.png}}
+  \caption{Continuación del diseño y avances reportados en Issue \#10.}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas06.png}}
+  \caption{Trabajo adicional sobre componentes del dashboard y workspace.}
+\end{subfigure}
+\caption{Evidencia de horas — Julio C. Gómez: diseño de pantallas técnicas Rol 1, parte 3.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas07.png}}
+  \caption{Avance de las pantallas del módulo de ingeniería.}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas08.png}}
+  \caption{Diseño del editor de nodos y la calculadora VLSM.}
+\end{subfigure}
+\caption{Evidencia de horas — Julio C. Gómez: diseño de pantallas técnicas Rol 1, parte 4.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas09.png}}
+  \caption{Avances en el Issue \#11 — diseño de pantallas Rol 2.}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas10.png}}
+  \caption{Pantalla de logs del supervisor y pantalla de supervisión (15/04).}
+\end{subfigure}
+\caption{Evidencia de horas — Julio C. Gómez: diseño de pantallas técnicas Rol 2, parte 1.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas11.png}}
+  \caption{Continuación de pantallas administrativas en Figma.}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas12.png}}
+  \caption{Cierre del Issue \#11 con las pantallas de Rol 2 terminadas.}
+\end{subfigure}
+\caption{Evidencia de horas — Julio C. Gómez: diseño de pantallas técnicas Rol 2, parte 2.}
+\end{figure}
+
+% ---------- YADID ----------
+\subsubsection{Yadid Asiel Soto Hernández — Arquitecto de Software y Jefe de Producción}
+
+Yadid lideró la definición de la arquitectura \emph{State-Driven}, la configuración del entorno Docker, la planificación técnica del proyecto y la redacción de la documentación formal. Además, fue responsable de la creación y gestión de todos los \emph{issues} en GitHub Projects, la asignación de tareas y la supervisión del avance general.
+
+\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{@{}>{\bfseries\color{uvblue}}p{1.2cm} p{2.2cm} p{5.8cm} >{\centering\arraybackslash}p{2cm}@{}}
+\caption{Bitácora de horas — Yadid Asiel Soto Hernández}\label{tab:horas-yadid}\\
+\toprule
+\textbf{Día} & \textbf{Horario} & \textbf{Actividad} & \textbf{Horas}\\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Día} & \textbf{Horario} & \textbf{Actividad} & \textbf{Horas}\\
+\midrule
+\endhead
+20/04 & 21:45--22:45 & Documentación de requisitos del arquitecto (Issue \#35). & 1.0\\
+21/04 & 21:20--22:30 & Continuación de documentación de responsabilidades del arquitecto. & 1.0\\
+27/04 & 21:00--23:30 & Planificación técnica: creación de \emph{issues}, asignación de tareas y definición de sprints (Issue \#37). & 2.5\\
+28/04 & 08:15--12:30 & Responsabilidades del arquitecto: corrección del diagrama E-R e implementación del modelo de base de datos. & 4.0\\
+28/04 & 21:00--23:30 & Continuación de la documentación y revisión de la arquitectura. & 2.5\\
+02/05 & 13:15--19:15 & Gestión del desarrollo: supervisión de avances, revisión de código y cierre de \emph{issues} (Issue \#51). & 6.0\\
+03/05 & 09:00--14:00 & Configuración del stack tecnológico, Docker Compose y documentación final del proyecto. & 5.0\\
+03/05 & 15:00--17:30 & Revisión final del reporte técnico e integración de artefactos. & 2.5\\
+\midrule
+\multicolumn{3}{r}{\textbf{Total}} & \textbf{24.5}\\
+\bottomrule
+\end{longtable}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas13.png}}
+  \caption{Issue \#34: corrección del diagrama E-R y modelo de base de datos.}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas14.png}}
+  \caption{Continuación de la arquitectura del proyecto de software.}
+\end{subfigure}
+\caption{Evidencia de horas — Yadid A. Soto: arquitectura del proyecto (Issue \#34).}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas15.png}}
+  \caption{Issue \#35: registro de horas de inicio y fin para la documentación del arquitecto (20--21/04).}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas16.png}}
+  \caption{Sesión del 28/04: hora de inicio 8:15, trabajo en responsabilidades del arquitecto.}
+\end{subfigure}
+\caption{Evidencia de horas — Yadid A. Soto: responsabilidades del arquitecto (Issue \#35).}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas17.png}}
+  \caption{Documentación continua de las responsabilidades del arquitecto.}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas18.png}}
+  \caption{Registro de avances y entregables documentales.}
+\end{subfigure}
+\caption{Evidencia de horas — Yadid A. Soto: responsabilidades del arquitecto (continuación).}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas19.png}}
+  \caption{Cierre del Issue \#35 con hora de finalización 23:30 (28/04).}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas21.png}}
+  \caption{Issue \#37: planificación técnica, hora de inicio 21:00 (27/04).}
+\end{subfigure}
+\caption{Evidencia de horas — Yadid A. Soto: cierre de arquitectura e inicio de planificación.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas22.png}}
+  \caption{Planificación técnica: creación de \emph{issues} y asignación de tareas.}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas23.png}}
+  \caption{Continuación de la planificación y definición de sprints.}
+\end{subfigure}
+\caption{Evidencia de horas — Yadid A. Soto: planificación técnica (Issue \#37).}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas24.png}}
+  \caption{Cierre de la planificación técnica.}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas50.png}}
+  \caption{Issue \#51: responsable de desarrollo, hora de inicio 13:15 (02/05).}
+\end{subfigure}
+\caption{Evidencia de horas — Yadid A. Soto: planificación y gestión del desarrollo.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\fbox{\includegraphics[width=0.65\textwidth]{imagenes/horas/Reporte_Horas51.png}}
+\caption{Evidencia de horas — Yadid A. Soto: supervisión de avances y cierre de desarrollo (Issue \#51).}
+\end{figure}
+
+% ---------- MIGUEL ----------
+\subsubsection{Miguel Alejandro Damián Bumas — Programador}
+
+Miguel se encargó de la implementación completa del backend (Python + FastAPI), los algoritmos de VLSM, los diagramas UML de cada pantalla y la integración con el frontend. Trabajó sobre los \emph{issues} de cada una de las once pantallas del sistema (\#39--\#49), generando los diagramas de actividad y secuencia, además de la configuración del stack tecnológico con Docker.
+
+\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{@{}>{\bfseries\color{uvblue}}p{1.2cm} p{2.2cm} p{5.8cm} >{\centering\arraybackslash}p{2cm}@{}}
+\caption{Bitácora de horas — Miguel Alejandro Damián Bumas}\label{tab:horas-miguel}\\
+\toprule
+\textbf{Día} & \textbf{Horario} & \textbf{Actividad} & \textbf{Horas}\\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Día} & \textbf{Horario} & \textbf{Actividad} & \textbf{Horas}\\
+\midrule
+\endhead
+28/04 & 10:00--14:00 & Inicio de implementación: Pantalla 01 (Login), diagrama UML de autenticación (Issue \#39). & 4.0\\
+28/04 & 15:00--19:00 & Pantalla 02 (Dashboard): diagrama UML y lógica de carga de proyectos (Issue \#40). & 4.0\\
+29/04 & 09:00--13:00 & Pantalla 03 (Workspace): diagramas de actividad del diseñador de topologías (Issue \#41). & 4.0\\
+29/04 & 14:00--17:00 & Pantallas 04--05: editor de nodos/VLSM y consola de simulación (Issues \#42--\#43). & 3.0\\
+30/04 & 10:00--14:00 & Pantallas 06--07: reporte de simulación y monitor de usuarios, diagramas UML (Issues \#44--\#45). & 4.0\\
+01/05 & 09:00--12:00 & Pantallas 08--09: CRUD de usuarios y administración de proyectos (Issues \#46--\#47). & 3.0\\
+01/05 & 13:00--15:00 & Pantalla 10: visor de logs de auditoría, diagramas UML (Issue \#48). & 2.0\\
+02/05 & 10:00--12:00 & Pantalla 11 e Issue \#50: historial de versiones y configuración del stack tecnológico (Docker). & 2.0\\
+\midrule
+\multicolumn{3}{r}{\textbf{Total}} & \textbf{26.0}\\
+\bottomrule
+\end{longtable}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas25.png}}
+  \caption{Issue \#39: inicio del trabajo en Pantalla 01 (Login), diagrama UML.}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas26.png}}
+  \caption{Continuación de la implementación del flujo de autenticación.}
+\end{subfigure}
+\caption{Evidencia de horas — Miguel A. Damián: Pantalla 01 Login (Issue \#39).}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas27.png}}
+  \caption{Avance en la Pantalla 02: Dashboard de proyectos (Issue \#40).}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas28.png}}
+  \caption{Diagramas UML de navegación del dashboard.}
+\end{subfigure}
+\caption{Evidencia de horas — Miguel A. Damián: Pantalla 02 Dashboard (Issue \#40).}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas29.png}}
+  \caption{Issue \#41: diagramas de actividad del workspace.}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas30.png}}
+  \caption{Diagrama de flujo del diseñador de topologías con NetPro Engine.}
+\end{subfigure}
+\caption{Evidencia de horas — Miguel A. Damián: Pantalla 03 Workspace (Issue \#41).}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas31.png}}
+  \caption{Trabajo en el editor de nodos y calculadora VLSM (Issue \#42).}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas32.png}}
+  \caption{Implementación de la consola de simulación (Issue \#43).}
+\end{subfigure}
+\caption{Evidencia de horas — Miguel A. Damián: Pantallas 04--05, editor y simulación.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas33.png}}
+  \caption{Reporte de simulación: diagramas UML (Issue \#44).}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas35.png}}
+  \caption{Monitor de usuarios: diagrama de actividad (Issue \#45).}
+\end{subfigure}
+\caption{Evidencia de horas — Miguel A. Damián: Pantallas 06--07, reporte y monitor.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas36.png}}
+  \caption{Continuación del monitor de usuarios (Issue \#45).}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas37.png}}
+  \caption{Diagrama UML del monitor de usuarios completado.}
+\end{subfigure}
+\caption{Evidencia de horas — Miguel A. Damián: Pantalla 07 Monitor de Usuarios (Issue \#45), continuación.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas38.png}}
+  \caption{Diagrama de flujo para el monitoreo operativo (Issue \#45).}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas39.png}}
+  \caption{Diagrama UML de navegación de botones (Issue \#45).}
+\end{subfigure}
+\caption{Evidencia de horas — Miguel A. Damián: Pantalla 07 Monitor de Usuarios, diagramas adicionales.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas41.png}}
+  \caption{Pantalla 08: CRUD de usuarios, diagrama de actividad (Issue \#46).}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas42.png}}
+  \caption{Pantalla 09: administración de proyectos de usuario (Issue \#47).}
+\end{subfigure}
+\caption{Evidencia de horas — Miguel A. Damián: Pantallas 08--09, CRUD y administración.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas43.png}}
+  \caption{Continuación de la administración de proyectos (Issue \#47).}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas44.png}}
+  \caption{Pantalla 10: visor de logs de auditoría, diagramas UML (Issue \#48).}
+\end{subfigure}
+\caption{Evidencia de horas — Miguel A. Damián: Pantallas 09--10, administración y logs.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas45.png}}
+  \caption{Continuación del visor de logs y diagramas de botones (Issue \#48).}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas46.png}}
+  \caption{Issue \#46: descripción de la actividad con tareas técnicas y duración estimada.}
+\end{subfigure}
+\caption{Evidencia de horas — Miguel A. Damián: Pantalla 10 y descripción de tareas técnicas.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas47.png}}
+  \caption{Pantalla 11: historial de versiones del proyecto (Issue \#49).}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas48.png}}
+  \caption{Avance en el historial de versiones y comparador JSON.}
+\end{subfigure}
+\caption{Evidencia de horas — Miguel A. Damián: Pantalla 11 Historial de Versiones (Issue \#49).}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\fbox{\includegraphics[width=0.65\textwidth]{imagenes/horas/Reporte_Horas49.png}}
+\caption{Evidencia de horas — Miguel A. Damián: Issue \#50, configuración del stack tecnológico (Dockerfile).}
+\end{figure}
+
+% ---------- JOSÉ ----------
+\subsubsection{José de Jesús Berman Islas — Ingeniero de Pruebas}
+
+José tuvo a su cargo la investigación de las tecnologías empleadas en el proyecto (InvestigPro, Issue \#36), la elaboración del plan de pruebas y la ejecución de todos los casos de prueba documentados (TP-01 a TP-10) sobre la aplicación integrada (Issue \#52). Su trabajo incluyó pruebas de funcionalidad, integración, seguridad (\emph{negative testing}) y validación algorítmica del motor VLSM, así como la redacción de los informes de defectos y observaciones.
+
+\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{@{}>{\bfseries\color{uvblue}}p{1.2cm} p{2.2cm} p{5.8cm} >{\centering\arraybackslash}p{2cm}@{}}
+\caption{Bitácora de horas — José de Jesús Berman Islas}\label{tab:horas-jose}\\
+\toprule
+\textbf{Día} & \textbf{Horario} & \textbf{Actividad} & \textbf{Horas}\\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Día} & \textbf{Horario} & \textbf{Actividad} & \textbf{Horas}\\
+\midrule
+\endhead
+20/04 & 12:40--13:40 & Investigación de tecnologías del proyecto: React, FastAPI, Zustand, Docker (Issue \#36). & 1.0\\
+21/04 & 11:00--14:00 & Continuación de la investigación y redacción del documento InvestigPro. & 3.0\\
+28/04 & 10:00--14:00 & Elaboración del plan de pruebas: definición de categorías, criterios de aceptación y datos de prueba. & 4.0\\
+02/05 & 13:10--19:00 & Ejecución de pruebas TP-01 a TP-06: login, creación de proyecto, renderizado DSL y VLSM (Issue \#52). & 5.5\\
+03/05 & 10:00--14:00 & Ejecución de pruebas TP-07 a TP-10: \emph{negative testing}, simulación con obstáculos y generación de PDF. & 4.0\\
+09/05 & 14:00--17:00 & Validación del reporte del simulador, observaciones finales y cierre del Issue \#52. & 3.0\\
+\midrule
+\multicolumn{3}{r}{\textbf{Total}} & \textbf{20.5}\\
+\bottomrule
+\end{longtable}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas20.png}}
+  \caption{Issue \#36 (InvestigPro): inicio de investigación a las 12:40 y entrega del documento final.}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas52.png}}
+  \caption{Issue \#52: inicio de pruebas a la 1:10\,pm con captura del dashboard de prueba.}
+\end{subfigure}
+\caption{Evidencia de horas — José de J. Berman: investigación e inicio de pruebas.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas54.png}}
+  \caption{Validación final del simulador, observación sobre el logo y cierre a las 7:00\,pm (09/05).}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering\fbox{\includegraphics[width=\linewidth]{imagenes/horas/Reporte_Horas55.png}}
+  \caption{Vista general de los 21 \emph{issues} cerrados en GitHub Projects del equipo NetPro.}
+\end{subfigure}
+\caption{Evidencia de horas — José de J. Berman: cierre de pruebas y panorama general del proyecto.}
+\end{figure}
+
+% =============================================================
+%                       5. CONCLUSIÓN
+% =============================================================
+\section{Conclusión de la actividad de aprendizaje}
+
+\subsection{Nivel de cumplimiento del objetivo}
+
+El objetivo de \emph{diseñar y documentar un proyecto de software aplicando la metodología en cascada} se cumplió de manera \textbf{satisfactoria}. Las cinco fases secuenciales (análisis, diseño, implementación, pruebas y mantenimiento) se ejecutaron completas, dejando trazabilidad documental en cada una. El producto resultante, NetPro Engine, es funcional en su flujo principal: el ingeniero puede iniciar sesión, crear un proyecto, escribir código DSL, ver la topología renderizada en tiempo real, ejecutar una simulación y exportar el reporte en PDF.
+
+\subsection{Aprendizaje alcanzado con la actividad}
+
+Más allá del producto entregable, el equipo consolidó aprendizajes críticos:
+
+\begin{itemize}[leftmargin=1.5em,itemsep=2pt]
+  \item \textbf{La metodología en cascada exige rigor en la fase de requisitos.} Cualquier ambigüedad inicial se amplifica en las fases posteriores y resulta costosa de corregir.
+  \item \textbf{El diseño arquitectónico previo evita refactorizaciones.} Definir el modelo \emph{State-Driven} y el pipeline de datos antes de codificar permitió que cada miembro trabajara en paralelo sobre interfaces estables.
+  \item \textbf{Las pruebas de \emph{negative testing} son tan valiosas como las funcionales.} Defectos como TP-04 sólo emergen al introducir datos atípicos.
+  \item \textbf{La separación de responsabilidades por rol facilita el trabajo en equipo.} Cada integrante pudo profundizar en su área sin bloquear a los demás.
+\end{itemize}
+
+\subsection{¿Cómo mejoraría esta práctica?}
+
+
+
+\begin{enumerate}[leftmargin=1.5em,itemsep=2pt]
+  \item La practica se siente muy completa, sin embargo se podría mejorar si se fuera mas cuidadoso con la documentación. El formato de un solo reporte centralizado para la presentación del proyecto es bueno como resumen, pero seria mejor si a cada modulo dentro del proyecto se le pudiera dedicar su respectiva documentación.
+  \item Del mismo modo la forma de organizar a los equipos se siente muy inconclusa, entre tanta teoría poner todo sobre ruedas sin tener experiencia previa se siente poco sostenible. Seria mucho mas manejable y una mejor practica si se tuviera ejemplos previos concretos, por ejemplo: una gran documentacion en donde se viera paso generales el como equipos pasados se estructuraron (si primero asignaron roles, que rol o requisitos de rol cumplieron primero, ejemplos de sus trabajos, etc).
+\end{enumerate}
+
+
+\end{document}
