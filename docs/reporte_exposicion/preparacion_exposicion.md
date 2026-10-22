@@ -196,7 +196,7 @@ siempre con `halt()`:
 ## 9. Demo en vivo sugerida (3 minutos)
 
 1. `./compilar.sh` → "Compilacion OK".
-2. `java -cp out ui.Simulador factorial --traza --estado` → señalizar el traza:
+2. `java -cp out ui.Emulador factorial --traza --estado` → señalizar el traza:
    PC, instrucción en binario y ensamblador, y el resultado `5040`.
 3. Mostrar el mapa de memoria (segmentos y direcciones hexadecimales).
 4. Abrir `./ventana.sh`, cargar el ejemplo, pulsar "Ejecutar 1 ciclo" varias
@@ -210,7 +210,7 @@ siempre con `halt()`:
 **P1: ¿Por qué un emulador y no un procesador real?**
 R: Porque se puede construir, observar y modificar entero en software: se ven
 los registros, la memoria y el ciclo instrucción a instrucción, algo imposible
-de ver en silicio. Es la misma idea que un simulador de vuelo: se aprende el
+de ver en silicio. Es la misma idea que un emulador de vuelo: se aprende el
 sistema arriesgando cero.
 
 **P2: ¿Por qué MIPS y no x86 o RISC-V?**

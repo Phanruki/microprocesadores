@@ -1,5 +1,5 @@
 #!/bin/bash
-# Ejecuta el plan completo de pruebas del simulador MIPS
+# Ejecuta el plan completo de pruebas del emulador MIPS
 set -e
 cd "$(dirname "$0")"
 [ -d out ] || ./compilar.sh

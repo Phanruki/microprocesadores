@@ -1,4 +1,4 @@
-# Plan de pruebas de sistema - Simulador MIPS
+# Plan de pruebas de sistema - Emulador MIPS
 
 - Alcance: los 5 programas de usuario final ejecutados de punta a punta
 - Codigo: `src/pruebas/PruebasSistema.java`

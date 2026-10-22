@@ -1,7 +1,7 @@
 package memoria;
 
 /**
- * ROM: segmento de texto del simulador.
+ * ROM: segmento de texto del emulador.
  *
  * Guarda el programa (instrucciones). Ancho de palabra de 32 bits y
  * 100 celdas, en las direcciones 0..99 del mapa de memoria. Se bloquea

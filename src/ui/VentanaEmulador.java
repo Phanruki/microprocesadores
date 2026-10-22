@@ -48,7 +48,7 @@ import java.awt.event.KeyEvent;
  *   - RAM: nombre (direccion) = binario
  *   - Estado CPU: PC, HI y LO en binario
  */
-public class VentanaSimulador extends JFrame {
+public class VentanaEmulador extends JFrame {
 
     private static final int LIMITE_CICLOS = 10000;
 
@@ -67,7 +67,7 @@ public class VentanaSimulador extends JFrame {
 
     private String ultimaCarga;
 
-    public VentanaSimulador() {
+    public VentanaEmulador() {
         super("Emulador MIPS - Practica 2");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(6, 6));
@@ -408,7 +408,7 @@ public class VentanaSimulador extends JFrame {
             // se conserva el look and feel por defecto
         }
         SwingUtilities.invokeLater(() -> {
-            VentanaSimulador ventana = new VentanaSimulador();
+            VentanaEmulador ventana = new VentanaEmulador();
             ventana.setVisible(true);
         });
     }

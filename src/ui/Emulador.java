@@ -20,9 +20,9 @@ import java.nio.file.Paths;
  * Emulador basico del procesador MIPS - Practica 2.
  *
  * Uso:
- *   java -cp out ui.Simulador <programa> [--traza] [--estado] [--captura archivo]
+ *   java -cp out ui.Emulador <programa> [--traza] [--estado] [--captura archivo]
  */
-public class Simulador {
+public class Emulador {
 
     public static void main(String[] args) throws IOException {
         if (args.length == 0 || "--gui".equals(args[0])) {
@@ -157,7 +157,7 @@ public class Simulador {
         }
     }
 
-    /** Abre la ventana grafica del simulador (modo interactivo). */
+    /** Abre la ventana grafica del emulador (modo interactivo). */
     private static void abrirVentana() {
         if (java.awt.GraphicsEnvironment.isHeadless()) {
             System.out.println("No hay pantalla disponible: se muestra el modo de texto.");
@@ -170,13 +170,13 @@ public class Simulador {
             // se conserva el look and feel por defecto
         }
         javax.swing.SwingUtilities.invokeLater(() -> {
-            VentanaSimulador ventana = new VentanaSimulador();
+            VentanaEmulador ventana = new VentanaEmulador();
             ventana.setVisible(true);
         });
     }
 
     private static void imprimirUso() {
-        System.out.println("Uso: java -cp out ui.Simulador [programa] [--traza] [--estado] [--captura <archivo>]");
+        System.out.println("Uso: java -cp out ui.Emulador [programa] [--traza] [--estado] [--captura <archivo>]");
         System.out.println("  (sin argumentos o con --gui se abre la ventana grafica)");
         System.out.println("  programas : sumatoria factorial integral promedio perceptron");
         System.out.println("  --traza   : imprime cada ciclo (PC y codigo de la instruccion)");

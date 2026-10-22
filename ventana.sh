@@ -2,4 +2,4 @@
 set -e
 cd "$(dirname "$0")"
 [ -d out ] || ./compilar.sh
-exec java -cp out ui.VentanaSimulador
+exec java -cp out ui.VentanaEmulador

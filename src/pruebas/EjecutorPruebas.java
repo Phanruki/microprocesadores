@@ -1,13 +1,13 @@
 package pruebas;
 
 /**
- * Ejecuta las tres suites de pruebas del simulador MIPS.
+ * Ejecuta las tres suites de pruebas del emulador MIPS.
  * Ejecucion: java pruebas.EjecutorPruebas
  */
 public class EjecutorPruebas {
 
     public static void main(String[] args) {
-        System.out.println("Plan de pruebas del simulador MIPS");
+        System.out.println("Plan de pruebas del emulador MIPS");
         System.out.println();
 
         int totalFallidas = 0;

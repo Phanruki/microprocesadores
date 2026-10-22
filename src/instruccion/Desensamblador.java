@@ -4,7 +4,7 @@ import cpu.CPU;
 import memoria.Registros;
 
 /**
- * Desensamblador de las instrucciones MIPS soportadas por el simulador.
+ * Desensamblador de las instrucciones MIPS soportadas por el emulador.
  *
  * mnemonico()   -> texto ensamblador de la instruccion
  * operacion()   -> efecto de la instruccion con los valores actuales

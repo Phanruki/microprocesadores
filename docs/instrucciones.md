@@ -1,4 +1,4 @@
-# Conjunto de instrucciones del simulador MIPS
+# Conjunto de instrucciones del emulador MIPS
 
 Instrucciones que el procesador ejecuta. Cada una se codifica en 32 bits
 con los tres formatos de MIPS (`src/instruccion/Instruccion.java`).

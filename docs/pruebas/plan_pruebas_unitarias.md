@@ -1,4 +1,4 @@
-# Plan de pruebas unitarias - Simulador MIPS
+# Plan de pruebas unitarias - Emulador MIPS
 
 - Alcance: clases unidad (`almacenamiento`, `alu`, `Instruccion`, `ProgramaBuilder`)
 - Herramienta propia: `src/pruebas/MiniTest.java`

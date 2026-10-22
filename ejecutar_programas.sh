@@ -6,7 +6,7 @@ cd "$(dirname "$0")"
 mkdir -p salidas
 for p in sumatoria factorial integral promedio perceptron; do
   echo "--- $p ---"
-  java -cp out ui.Simulador "$p" --estado --captura "salidas/${p}_captura.txt"
+  java -cp out ui.Emulador "$p" --estado --captura "salidas/${p}_captura.txt"
   echo
 done
 echo "Capturas guardadas en salidas/"

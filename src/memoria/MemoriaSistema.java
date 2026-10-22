@@ -3,7 +3,7 @@ package memoria;
 import java.util.List;
 
 /**
- * Mapa de memoria segmentado del simulador.
+ * Mapa de memoria segmentado del emulador.
  *
  * Cada direccion global pertenece a un segmento; la unidad correspondiente
  * se elige segun la direccion base de cada segmento.

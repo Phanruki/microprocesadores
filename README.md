@@ -1,6 +1,6 @@
-# Practica 2 - Simulador basico de un procesador (Java)
+# Practica 2 - Emulador basico de un procesador (Java)
 
-Simulador de un procesador MIPS construido como un nucleo de 5 paquetes
+Emulador de un procesador MIPS construido como un nucleo de 5 paquetes
 grandes (`cpu`, `ejecucion`, `memoria`, `alu`, `instruccion`) al estilo del
 diagrama del compañero, con concepto de **segmento y direccion** en la memoria,
 una **CPU que nunca muere** (arranca en 0, siempre ejecuta) y una instruccion
@@ -24,7 +24,7 @@ src/
   alu/               ALU y enum OperacionALU (incluye LUI)
   instruccion/       Instruccion, Decodificador, Opcode, Funct, FormatoInstruccion,
                      ServicioSyscall, ProgramaBuilder, Desensamblador, Binario
-  ui/                Simulador (modo texto) y VentanaSimulador (ventana grafica)
+  ui/                Emulador (modo texto) y VentanaEmulador (ventana grafica)
   programas/         Sumatoria, Factorial, Integral, Promedio, Perceptron, Impresion
   pruebas/           MiniTest, PruebasUnitarias, PruebasIntegracion,
                      PruebasSistema, EjecutorPruebas
@@ -47,7 +47,7 @@ salidas/             capturas de ejecucion (inicio y fin) de cada programa
 ## Ventana grafica
 
 ```bash
-java -cp out ui.VentanaSimulador    # o simplemente: java -cp out ui.Simulador
+java -cp out ui.VentanaEmulador    # o simplemente: java -cp out ui.Emulador
 ./ventana.sh
 ```
 
@@ -70,9 +70,9 @@ ejecuta todo el programa.
 ## Ejecutar un programa (modo texto)
 
 ```bash
-java -cp out ui.Simulador factorial
-java -cp out ui.Simulador factorial --traza --estado
-java -cp out ui.Simulador factorial --estado --captura salidas/factorial_captura.txt
+java -cp out ui.Emulador factorial
+java -cp out ui.Emulador factorial --traza --estado
+java -cp out ui.Emulador factorial --estado --captura salidas/factorial_captura.txt
 ```
 
 Opciones:

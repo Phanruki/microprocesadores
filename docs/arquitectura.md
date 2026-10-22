@@ -9,7 +9,7 @@
 - [ ] AMD
 
 MIPS es RISC con formatos de instruccion fijos (R, I y J), lo que facilita
-implementar el simulador por unidades funcionales.
+implementar el emulador por unidades funcionales.
 
 ---
 

@@ -9,7 +9,7 @@ Requisitos del reporte (de `docs/practica/reporte_final.txt`):
 
 1. Portada: nombres, matrículas, título, fecha de entrega + plantilla UV.
 2. Introducción: (a) razones para desarrollar un procesador propio desde cero,
-   (b) ganancia de un alumno que sabe implementar un simulador de un procesador
+   (b) ganancia de un alumno que sabe implementar un emulador de un procesador
    real, (c) por qué se implementó un emulador para el procesador MIPS.
 3. Evidencia de ejecución: tabla "Línea de código a ejecutar | resultado del
    emulador".
@@ -21,13 +21,137 @@ Requisitos del reporte (de `docs/practica/reporte_final.txt`):
 
 ---
 
-## 1. Datos de la portada (rellenar)
+## 0. Verificación contra la práctica y el diagrama del compañero (2026-10-22)
 
-- Título: "Emulador básico de un procesador (Práctica 2)" — *o el que elija el
-  equipo*.
-- Materia / universidad: Universidad Veracruzana (usar la plantilla UV).
-- Nombres y matrículas: **pendiente de completar por el equipo**.
-- Fecha de entrega: **pendiente**.
+> Todo lo de esta sección se **comprobó ejecutando** el proyecto hoy
+> (`./compilar.sh`, `java -cp out pruebas.EjecutorPruebas`, lectura de
+> `salidas/`, lectura de `docs/practica/practica.txt` + `reporte_final.txt`
+> y revisión de `docs/practica/DiagramaDiego.jpg`). Es material de apoyo para
+> las secciones 2, 3 y 5.
+
+### 0.1 Checklist de la práctica (Pasos 1 a 5)
+
+| Paso | Qué pide el profesor | Dónde está en el proyecto | Estado |
+|---|---|---|---|
+| 1 | Ancho de palabra = 32 bits | `UnidadAlmacenamiento.ANCHO_PALABRA_DEFECTO = 32`; `ROM/RAM/DiscoDuro.ANCHO_PALABRA = 32` | ✅ |
+| 1 | Registros del procesador | `Registros.CANTIDAD = 32`, `Registros.ANCHO = 32` | ✅ |
+| 1 | PC de 32 bits que se incrementa al buscar | `cpu/PC.ANCHO = 32`, `incrementar()`, `reiniciar()` → 0 | ✅ |
+| 1 | `DiscoDuro` = copia de "unidad de almacenamiento", 32 bits, 100 celdas | `DiscoDuro extends UnidadAlmacenamiento`, `CELDAS = 100`, direcciones 200..299 | ✅ |
+| 1 | RAM 32 bits / 100 celdas | `RAM.CELDAS = 100`, `DIRECCION_BASE = 100` (100..199) | ✅ |
+| 1 | ROM 32 bits / 100 celdas | `ROM.CELDAS = 100`, `DIRECCION_BASE = 0` (0..99) | ✅ |
+| 2 | Seleccionar procesador a emular → **MIPS** | casilla `[ x ] MIPS` en `practica.md`; código con formatos R/I/J | ✅ |
+| 3 | 3 planes de pruebas (técnicas, integración, sistema) | `docs/pruebas/plan_pruebas_{unitarias,integracion,sistema}.md` + `src/pruebas/*` | ✅ |
+| 4 | 5 programas de usuario (sumatoria, factorial, integral, promedio, perceptrón) | `src/programas/{Sumatoria,Factorial,Integral,Promedio,Perceptron}.java` | ✅ |
+| 4 | Capturas al inicio y al final de cada ejecución | `salidas/*_captura.txt` (cada una con línea `INICIO DE EJECUCION` y `FIN DE EJECUCION`; 188–189 líneas) | ✅ texto; falta confirmar si exige imágenes (ver pendientes, sección 7) |
+| 5 | Reporte con portada/introducción/evidencia/IA/reflexiones en PDF por Eminus | material en `docs/reporte_exposicion/` (este registro + `prompts_usados.md`) | ⏳ en proceso |
+
+### 0.2 Salidas reales re-verificadas hoy (para la tabla de evidencia)
+
+`./compilar.sh` → `Compilacion OK -> out/`
+`java -cp out pruebas.EjecutorPruebas` → **117 unitarias + 44 integración + 40 sistema = 201 pruebas, 0 fallidas** (`Resultado global: todas las pruebas pasaron`).
+
+| Programa | Salida real | Ciclos (línea `FIN DE EJECUCION`) | Captura |
+|---|---|---|---|
+| `sumatoria` | `Sumatoria de 3 a 10 = 52` | 68 | `salidas/sumatoria_captura.txt` |
+| `factorial` | `Factorial de 7 = 5040` | 63 | `salidas/factorial_captura.txt` |
+| `integral` | `Integral de x^2 dx desde x=1 hasta x=5 = 30` | 56 | `salidas/integral_captura.txt` |
+| `promedio` | `Vector: 4 8 15 16 23` / `Promedio = 13` | 123 | `salidas/promedio_captura.txt` |
+| `perceptron` | `z = 3  y = 1` | 62 | `salidas/perceptron_captura.txt` |
+
+Primeras líneas reales de la traza de `factorial` (`--traza`, se imprime en
+hexadecimal; la interpretación en ensamblador es la de la Tabla 1 del borrador,
+que coincide palabra por palabra):
+
+```
+  [   0] PC=  0  0x8C080064   -> lw   $t0, 100($zero)
+  [   1] PC=  1  0x24020004   -> addiu $v0, $zero, 4
+  [   2] PC=  2  0x24040065   -> addiu $a0, $zero, 101
+  [   3] PC=  3  0x0000000C   -> syscall
+```
+
+### 0.3 Correspondencia con el diagrama del compañero (`docs/practica/DiagramaDiego.jpg`)
+
+Diagrama de Diego: `com > mycompany > mipsemulator > { ui, cpu, execution,
+memory, alu, instruction }`.
+
+| Paquete/clase en el diagrama de Diego | Equivalente en nuestro proyecto | Observación |
+|---|---|---|
+| `cpu`: `CPU`, `PC` | `cpu`: `CPU`, `PC` | **Idéntico** |
+| `execution`: `EjecutorInstrucciones`, `UnidadControl` | `ejecucion`: `EjecutorInstrucciones`, `UnidadControl`, **`SenalesControl`** | mismo esqueleto + añadimos las señales de control (con `Builder`) |
+| `memory`: `Registros`, `MemoriaInstrucciones`, `DiscoDuro`, `ROM`, `RAM`, `UnidadAlmacenamiento` | `memoria`: `Registros`, **`MemoriaSistema`**, `DiscoDuro`, `ROM`, `RAM`, `UnidadAlmacenamiento` | misma jerarquía de herencia (`ROM/RAM/DiscoDuro --|> UnidadAlmacenamiento`); nosotros usamos `MemoriaSistema` (enrutador por dirección) en lugar de `MemoriaInstrucciones` |
+| `alu`: `ALU` | `alu`: `ALU` + enum `OperacionALU` | idéntico + explícito el enum |
+| `instruction`: `Instruccion`, `Decodificador`, `FormatoInstruccion`«E», `Funct`«E», `Opcode`«E» | `instruccion`: los mismos + `ServicioSyscall`, `ProgramaBuilder`, `Desensamblador`, `Binario` | misma base + herramientas de apoyo |
+| `ui`: `MIPSEmulatorUI` | `ui`: `Emulador` (texto) y `VentanaEmulador` (Swing) | equivalente funcional |
+| `Microprocesador` (clase raíz) | no tiene equivalente literal | el papel lo cumple `CPU`; `Emulador`/`VentanaEmulador` la orquestan |
+| contenedor `com.mycompany.mipsemulator` | paquetes en la raíz de `src/` | sin prefijo de empresa (proyecto escolar) |
+| (no existe) | `ui`, `programas`, `pruebas` como clientes del núcleo | lo muestra `docs/diagramas/diagrama_clases_exterior.png` |
+
+Nuestros diagramas: `docs/diagramas/diagrama_clases_nucleo.png` (los 5 paquetes,
+el "equivalente" al de Diego) y `diagrama_clases_exterior.png`; regenerables con
+PlantUML según `docs/diagramas/generacion_diagrama_clases.md`.
+
+**Conclusión para el reporte**: mismo esqueleto de 5 unidades
+(cpu / ejecución / memoria / ALU / instrucción); lo que aportamos por encima del
+diagrama del compañero son `SenalesControl`, `MemoriaSistema` con direcciones
+visibles, `ProgramaBuilder`/`Desensamblador`/`ServicioSyscall`, la instrucción
+`HALT` (0x3F) y la CPU que nunca muere (PC circular + NOP en 0 + límite de
+100000 ciclos). Útil para la reflexión de "trabajo en equipo" y para la pregunta
+probable **P13** de `preparacion_exposicion.md`.
+
+### 0.4 Material del reporte disponible en `docs/`
+
+Todo el material del reporte vive ahora en la documentación del proyecto
+(la carpeta `entregable_escuela/` y su borrador `.docx` **ya no se usan**):
+
+| Archivo | Qué contiene |
+|---|---|
+| `docs/reporte_exposicion/registro_reporte_final.md` (este archivo) | datos de portada, material de la introducción, tablas de evidencia, reflexiones y pendientes |
+| `docs/reporte_exposicion/prompts_usados.md` | los **14 prompts** completos de la sección "Uso de IA" (con autor, texto y resultado) |
+| `docs/reporte_exposicion/preparacion_exposicion.md` | explicación para exponer + preguntas probables del profesor |
+| `docs/arquitectura.md`, `docs/instrucciones.md` | arquitectura y conjunto de instrucciones |
+| `docs/pruebas/plan_pruebas_*.md` | los 3 planes de pruebas |
+| `docs/programas/factorial_explicacion.md` | explicación línea por línea del factorial |
+| `docs/diagramas/*.png` / `.puml` | diagramas de clases regenerados |
+
+Datos clave que debe reflejar el reporte (verificados, secciones 0.1 y 0.2):
+estructura de **5 paquetes**, **201 pruebas** (117 + 44 + 40), ciclo de
+**5 etapas** (IF/ID/EX/MEM/WB), ALU con **13 operaciones + NOP**, instrucción
+**HALT** (0x3F), CPU que **nunca muere** (PC circular, NOP en 0, límite de
+100000 ciclos) y los ciclos reales **68 / 63 / 56 / 123 / 62**.
+
+---
+
+## 1. Datos de la portada
+
+- Facultad: **Facultad de Ingeniería en Electrónica y Comunicaciones — Región Poza Rica-Tuxpan**
+- Licenciatura: **Ingeniería en Tecnologías Computacionales**
+- Trabajo: **Práctica 2 — "Emulador Básico de un Microprocesador"**
+  (**terminología**: en todo el proyecto, el código y la documentación se usa
+  **"emulador"**, igual que la práctica y su rúbrica; el texto del profesor
+  `practica.md` (copia de la práctica) es el único lugar donde aparece
+  "simulador" y no se modificó porque es un archivo del profesor).
+- Equipo (datos del equipo):
+
+  | Nombre | Matrícula |
+  |---|---|
+  | Yadid Asiel Soto Hernández | zS24006887 |
+  | Jose de Jesus Berman Islas | zS24006897 |
+  | Miguel Alejandro Damian Bumas | zS24021396 |
+
+- Docente: **Dr. Raúl Varguez Fernández**
+- Fecha de entrega: **pendiente de fijar** (colocar el mes/año reales de la
+  entrega en Eminus).
+- Lema UV (portada y pie): **"Lis de Veracruz: Arte, Ciencia, Luz"** (+ `www.uv.mx`).
+- Plantilla UV: **descargarla desde Eminus** (la práctica dice "Descargar
+  plantilla UV"); el documento final se entrega **únicamente en PDF por Eminus**.
+- Secciones que debe tener el documento (según la práctica): **Portada ·
+  Introducción · Evidencia de ejecución del código · Uso de inteligencias
+  artificiales (prompts) · Reflexiones finales** (+ referencias, opcional).
+- Reparto del equipo (dato para la reflexión de "trabajo en equipo"):
+  *Yadid* → unidades de almacenamiento + ALU, programas `sumatoria` y
+  `promedio`; *José de Jesús* → sistema de pruebas, documentación y `DiscoDuro`;
+  *Miguel* → programas `factorial`, `integral`, `perceptron` y la ventana
+  gráfica. (Revalidar tras la reestructuración a 5 paquetes.)
 
 ---
 
@@ -46,7 +170,7 @@ Requisitos del reporte (de `docs/practica/reporte_final.txt`):
   el ensamblador y el sistema operativo existen porque la CPU hace exactamente
   esto.
 
-### 2.2 ¿Qué gana el alumno al saber implementar un simulador de un procesador real?
+### 2.2 ¿Qué gana el alumno al saber implementar un emulador de un procesador real?
 
 - Depuración de bajo nivel: cuando el programa "no funciona" sin razón aparente,
   se sabe mirar registros, memoria y el flujo de instrucciones.
@@ -84,16 +208,16 @@ proyecto (`salidas/`).
 | Línea de código a ejecutar | Resultado del emulador |
 |---|---|
 | `./compilar.sh` | `Compilacion OK -> out/` |
-| `java -cp out ui.Simulador sumatoria --estado --captura salidas/sumatoria_captura.txt` | `Sumatoria de 3 a 10 = 52` y `FIN DE EJECUCION - la CPU se detuvo con HALT/exit - ciclos: 68` |
-| `java -cp out ui.Simulador factorial` | `Factorial de 7 = 5040` (ciclos: 63) |
-| `java -cp out ui.Simulador integral` | `Integral de x^2 dx desde x=1 hasta x=5 = 30` (ciclos: 56) |
-| `java -cp out ui.Simulador promedio` | `Vector: 4 8 15 16 23` / `Promedio = 13` (ciclos: 123) |
-| `java -cp out ui.Simulador perceptron` | `z = 3  y = 1` (ciclos: 62) |
+| `java -cp out ui.Emulador sumatoria --estado --captura salidas/sumatoria_captura.txt` | `Sumatoria de 3 a 10 = 52` y `FIN DE EJECUCION - la CPU se detuvo con HALT/exit - ciclos: 68` |
+| `java -cp out ui.Emulador factorial` | `Factorial de 7 = 5040` (ciclos: 63) |
+| `java -cp out ui.Emulador integral` | `Integral de x^2 dx desde x=1 hasta x=5 = 30` (ciclos: 56) |
+| `java -cp out ui.Emulador promedio` | `Vector: 4 8 15 16 23` / `Promedio = 13` (ciclos: 123) |
+| `java -cp out ui.Emulador perceptron` | `z = 3  y = 1` (ciclos: 62) |
 | `java -cp out pruebas.PruebasUnitarias` | `RESUMEN PRUEBAS UNITARIAS / Pasadas: 117  Fallidas: 0` |
 | `java -cp out pruebas.PruebasIntegracion` | `RESUMEN PRUEBAS DE INTEGRACION / Pasadas: 44  Fallidas: 0` |
 | `java -cp out pruebas.PruebasSistema` | `RESUMEN PRUEBAS DE SISTEMA / Pasadas: 40  Fallidas: 0` |
 | `java -cp out pruebas.EjecutorPruebas` | `Resultado global: todas las pruebas pasaron` (201 pruebas) |
-| `java -cp out ui.Simulador factorial --traza --estado` | traza ciclo a ciclo (PC, binario y ensamblador) + volcado de registros y mapa de memoria |
+| `java -cp out ui.Emulador factorial --traza --estado` | traza por ciclo con formato `[  n] PC= x  0xXXXXXXXX` (número de ciclo, PC y código de la instrucción en **hexadecimal**) + volcado de registros y mapa de memoria. **Nota verificada**: el mnemónico/ensamblador y las señales de control **no** aparecen en `--traza`, sino en `ui.VentanaEmulador` (usa `Desensamblador.mnemonico()` / `.operacion()`) |
 
 ### 3.2 Filas con contenido del emulador (ejemplo de traza)
 
@@ -120,7 +244,7 @@ Cada captura de `salidas/` incluye:
   RAM arranca en `000`, p. ej. `[ 81] dir 181 (0x000000B5) = 0 (0x00000000)`.
 - Estado final con los registros que quedaron con valores.
 
-### 3.4 Evidencia de la ventana gráfica (`ui.VentanaSimulador`)
+### 3.4 Evidencia de la ventana gráfica (`ui.VentanaEmulador`)
 
 - Historial por ciclo: `Ciclo`, `PC`, instrucción en binario + ensamblador,
   operación, **señales de control** y `PC Siguiente`.
@@ -130,25 +254,31 @@ Cada captura de `salidas/` incluye:
 
 ## 4. Uso de IA: PROMPTs (declarar plenamente; el rubro lo exige)
 
-La práctica pide declarar el uso de IA con sus prompts. Registrar aquí los
-prompts usados; el equipo debe completar los suyos (historial de la
-conversación). Ejemplo de prompts usados en este proyecto:
+La práctica pide declarar el uso de IA con sus prompts. **Decisión del equipo:
+el rubro aplicable es "Uso de IA"** (según `docs/practica/reporte_final.txt`:
+*"el equipo reconoce y describe plenamente el uso de IA"*), no el de CACHÉton
+que aparece en una copia de la práctica.
 
-1. "Analiza las siguientes clases. <CÓDIGO>" *(prompt de la práctica, Paso 3)*.
-2. "Genera un plan de pruebas para el emulador del procesador MIPS."
-3. "Genera un plan de pruebas de integración de código para el emulador de
-   procesador MIPS."
-4. "Genera un plan de pruebas de sistema para el código para el emulador del
-   procesador MIPS."
-5. "Genera un código en lenguaje ensamblador para el procesador MIPS que
-   implemente el factorial de un número, con explicación de cada línea, usando
-   solo estas instrucciones: <lista>".
-6. *(Este proyecto)* "Reorganiza el emulador en 5 paquetes grandes (cpu,
-   ejecucion, memoria, alu, instruccion) al estilo del diagrama del compañero,
-   con la memoria segmentada por dirección (ROM texto@0, RAM datos@100,
-   disco@200), una CPU que nunca muere (arranca en 0, PC circular, memoria en
-   0 = NOP, límite de 100000 ciclos) y una instrucción HALT para que la CPU sepa
-   que el programa terminó; añade pruebas y regenera los diagramas."
+Los **14 prompts** completos (con autor, texto y resultado) están en
+**`docs/reporte_exposicion/prompts_usados.md`**; ese archivo es el que se copia
+al reporte. Resumen:
+
+| # | Autor | Tema |
+|---|---|---|
+| 1 | Yadid | Análisis de las clases y reorganización en paquetes |
+| 2 | José de Jesús | Plan de pruebas unitarias (117) |
+| 3 | José de Jesús | Plan de pruebas de integración (44) |
+| 4 | José de Jesús | Plan de pruebas de sistema (40) |
+| 5 | Miguel | Factorial (prompt literal de la práctica) |
+| 6 | Yadid | Sumatoria 3→10 |
+| 7 | Miguel | Integral de x² de 1 a 5 |
+| 8 | Yadid | Promedio de {4, 8, 15, 16, 23} |
+| 9 | Miguel | Perceptrón con entradas fijas |
+| 10 | Yadid | Clase ALU |
+| 11 | José de Jesús | `DiscoDuro` (copia de la unidad de almacenamiento) |
+| 12 | Miguel | Ventana gráfica (`ui.VentanaEmulador`) |
+| 13 | José de Jesús | Documentación del conjunto de instrucciones |
+| 14 | Equipo | Reestructuración final a 5 paquetes + HALT + CPU que nunca muere |
 
 **Reflexión sobre IA para el reporte**: la IA se usó como copiloto (diseño de
 la estructura de paquetes, generación de pruebas y redacción de explicaciones),
@@ -220,7 +350,7 @@ se reconstruyeron con un Builder para evitar errores de argumentos posicionales)
 ./probar.sh                        # 201 pruebas: 117 + 44 + 40, todas OK
 ./ejecutar_programas.sh            # genera salidas/*_captura.txt
 ./ventana.sh                       # abre la ventana grafica
-java -cp out ui.Simulador factorial --traza --estado   # traza + estado
+java -cp out ui.Emulador factorial --traza --estado   # traza + estado
 ```
 
 Estructura final (5 paquetes grandes + clientes):
@@ -251,9 +381,26 @@ Decisiones que conviene mencionar en el reporte:
 
 ## 7. Pendientes antes de entregar
 
-- [ ] Completar nombres, matrículas y fecha en la portada (plantilla UV).
-- [ ] Redactar la introducción con el material de la sección 2 (en voz propia).
+- [x] Nombres y matrículas de la portada → sección 1.
+- [x] Unificar el término **"emulador"** en código, scripts, documentación y
+      diagramas (hecho: clases `ui.Emulador` y `ui.VentanaEmulador`,
+      `./compilar.sh`, `./probar.sh` y diagramas regenerados).
+- [x] Declaración de IA → rubro **"Uso de IA"** con los 14 prompts de
+      `docs/reporte_exposicion/prompts_usados.md`.
+- [x] Diagramas de clases regenerados (`docs/diagramas/*.png`) con los nombres
+      actuales.
+- [ ] Redactar el documento con **plantilla UV** (descargarla de Eminus) usando
+      las secciones 1 a 5 de este registro.
+- [ ] Poner la **fecha de entrega** real en la portada.
 - [ ] Elegir 5–8 filas de las tablas de la sección 3 (copiar la salida real).
-- [ ] Pegar los prompts reales del equipo en la sección 4.
+- [ ] Decidir si la tabla de evidencia del factorial se queda en ensamblador
+      (`lw $t0, 100($zero)` → `$t0 = Mem[100] = 7`, que **coincide** con el
+      binario real `0x8C080064`) o se muestra también el hexadecimal de `--traza`.
+- [ ] **Capturas de pantalla (imágenes)** al inicio y al final de cada
+      ejecución, como pide el Paso 4: existen las capturas de **texto**
+      (`salidas/*_captura.txt`); falta confirmar si el profesor exige
+      imágenes/figuras dentro del PDF.
 - [ ] Redactar las reflexiones (sección 5) con voz propia del equipo.
+- [ ] Borrar (o ignorar) la carpeta **`entregable_escuela/`**: ya no se usa; el
+      material vive en `docs/`.
 - [ ] Exportar a **PDF** y subirlo **únicamente por Eminus**.

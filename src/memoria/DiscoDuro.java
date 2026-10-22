@@ -7,7 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 /**
- * Disco duro: segmento de almacenamiento persistente del simulador.
+ * Disco duro: segmento de almacenamiento persistente del emulador.
  *
  * Copia de la unidad de almacenamiento con ancho de palabra de 32 bits
  * y 100 celdas, en las direcciones 200..299 del mapa de memoria.

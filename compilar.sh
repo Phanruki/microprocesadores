@@ -1,5 +1,5 @@
 #!/bin/bash
-# Compila el simulador y las pruebas
+# Compila el emulador y las pruebas
 set -e
 cd "$(dirname "$0")"
 rm -rf out

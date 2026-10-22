@@ -1,4 +1,4 @@
-# Plan de pruebas de integracion - Simulador MIPS
+# Plan de pruebas de integracion - Emulador MIPS
 
 - Alcance: composicion de unidades y ciclo de la CPU completo
 - Codigo: `src/pruebas/PruebasIntegracion.java`

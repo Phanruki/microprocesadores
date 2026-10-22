@@ -18,7 +18,7 @@ import static instruccion.ProgramaBuilder.V0;
 import static instruccion.ProgramaBuilder.ZERO;
 
 /**
- * Pruebas de integracion del simulador del procesador MIPS.
+ * Pruebas de integracion del emulador del procesador MIPS.
  * Verifican el flujo completo: programa -> ROM -> CPU -> salida.
  * Ejecucion: java -cp out pruebas.PruebasIntegracion
  */

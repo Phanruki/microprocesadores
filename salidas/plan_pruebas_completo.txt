@@ -1,4 +1,4 @@
-Plan de pruebas del simulador MIPS
+Plan de pruebas del emulador MIPS
 
 == Pruebas unitarias ==
 === PRUEBAS UNITARIAS - Emulador MIPS ===

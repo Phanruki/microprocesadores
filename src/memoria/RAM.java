@@ -1,7 +1,7 @@
 package memoria;
 
 /**
- * RAM: segmento de datos del simulador.
+ * RAM: segmento de datos del emulador.
  *
  * Ancho de palabra de 32 bits y 100 celdas, en las direcciones
  * 100..199 del mapa de memoria. Todas las celdas arrancan en

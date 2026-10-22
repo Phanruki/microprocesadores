@@ -134,14 +134,14 @@ package "pruebas automaticas (validan el nucleo)" #FFEFEF {
 
 ' ==================================================================
 package "interfaz (extension externa)" #F0F0F0 {
-  class Simulador {
+  class Emulador {
     + static main(String[])
     - static construir(String) : ProgramaBuilder.Programa
     - static abrirVentana()
     - static imprimirUso()
   }
-  class VentanaSimulador extends JFrame {
-    + VentanaSimulador()
+  class VentanaEmulador extends JFrame {
+    + VentanaEmulador()
     + static main(String[])
     - ejecutarCiclos(int)
     - cargarInstrucciones()
@@ -175,13 +175,13 @@ EjecutorPruebas ..> PruebasUnitarias : "lanza las 3 suites"
 EjecutorPruebas ..> PruebasIntegracion
 EjecutorPruebas ..> PruebasSistema
 
-Simulador ..> CPU : "nueva CPU y ejecutar()"
-Simulador ..> RAM : "carga datos en la RAM"
-Simulador ..> Impresion : "cadenas de los programas"
-Simulador ..> VentanaSimulador : "abre con --gui"
-VentanaSimulador *-right-> CPU : "cada ventana tiene su CPU"
-VentanaSimulador ..> SenalesControl : "historial de senales"
-VentanaSimulador ..> MemoriaSistema : "mapa de memoria"
+Emulador ..> CPU : "nueva CPU y ejecutar()"
+Emulador ..> RAM : "carga datos en la RAM"
+Emulador ..> Impresion : "cadenas de los programas"
+Emulador ..> VentanaEmulador : "abre con --gui"
+VentanaEmulador *-right-> CPU : "cada ventana tiene su CPU"
+VentanaEmulador ..> SenalesControl : "historial de senales"
+VentanaEmulador ..> MemoriaSistema : "mapa de memoria"
 
 note bottom of CPU
   El nucleo no conoce a la interfaz: los paquetes
