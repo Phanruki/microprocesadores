@@ -1,13 +1,13 @@
 package programas;
 
-import mips.ProgramaBuilder;
+import instruccion.ProgramaBuilder;
 
-import static mips.ProgramaBuilder.T0;
-import static mips.ProgramaBuilder.T1;
-import static mips.ProgramaBuilder.T2;
-import static mips.ProgramaBuilder.T3;
-import static mips.ProgramaBuilder.T4;
-import static mips.ProgramaBuilder.ZERO;
+import static instruccion.ProgramaBuilder.T0;
+import static instruccion.ProgramaBuilder.T1;
+import static instruccion.ProgramaBuilder.T2;
+import static instruccion.ProgramaBuilder.T3;
+import static instruccion.ProgramaBuilder.T4;
+import static instruccion.ProgramaBuilder.ZERO;
 
 /**
  * Integral definida de f(x) = x^2 en [1, 5] por rectangulos de ancho 1:

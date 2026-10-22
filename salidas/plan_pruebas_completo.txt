@@ -1,20 +1,37 @@
 Plan de pruebas del simulador MIPS
 
 == Pruebas unitarias ==
-=== PRUEBAS UNITARIAS - Simulador MIPS ===
+=== PRUEBAS UNITARIAS - Emulador MIPS ===
 
 -- UnidadAlmacenamiento --
   [PASS] ancho de palabra = 32 bits
   [PASS] cantidad de celdas = 100
+  [PASS] nombre del segmento
   [PASS] lectura celda 0
   [PASS] lectura celda 99
   [PASS] escritura fuera de rango (100)
   [PASS] lectura fuera de rango (-1)
   [PASS] limpiar pone celda 0 a 0
   [PASS] constructor rechaza celdas <= 0
+-- Segmentos de memoria --
+  [PASS] ROM = segmento de texto en la direccion 0
+  [PASS] RAM = segmento de datos en la direccion 100
+  [PASS] disco = segmento de almacenamiento en la direccion 200
+  [PASS] la direccion 100 pertenece a la RAM
+  [PASS] la direccion 100 no pertenece a la ROM
+  [PASS] direccion absoluta -> local en RAM
+  [PASS] direccion absoluta -> local en disco
+  [PASS] direccion de otro segmento rechazada
+  [PASS] el mapa tiene 300 celdas
+  [PASS] leer direccion global 105 en la RAM
+  [PASS] escribir/leer direccion global 105
+  [PASS] escribir en 105 llega a la celda local 5 de la RAM
+  [PASS] direccion fuera del mapa (300)
 -- RAM / ROM --
   [PASS] RAM ancho 32 bits
   [PASS] RAM 100 celdas
+  [PASS] RAM arranca en 0x00000000 (celda 0)
+  [PASS] RAM arranca en 0x00000000 (celda 99)
   [PASS] RAM escritura/lectura
   [PASS] ROM ancho 32 bits
   [PASS] ROM 100 celdas
@@ -36,7 +53,7 @@ Plan de pruebas del simulador MIPS
   [PASS] $zero siempre es 0
   [PASS] indice de registro invalido
   [PASS] limpiar registros
--- Contador de programa --
+-- Contador de programa (PC) --
   [PASS] PC inicia en 0
   [PASS] PC incrementa en 1 (siguiente instruccion)
   [PASS] PC tras 3 incrementos
@@ -68,18 +85,31 @@ Plan de pruebas del simulador MIPS
   [PASS] rt de add
   [PASS] rd de add
   [PASS] funct de add
-  [PASS] es tipo R
+  [PASS] decodificar: opcode ADD
+  [PASS] decodificar: funct ADD
+  [PASS] decodificar: formato R
   [PASS] funct de addu
   [PASS] funct de subu
   [PASS] funct de sltu
   [PASS] opcode de addi
   [PASS] inmediato de addi
+  [PASS] decodificar: opcode ADDI
   [PASS] opcode de addiu
   [PASS] extension de signo de -3
   [PASS] opcode de sltiu
   [PASS] opcode de j
   [PASS] direccion de j
+  [PASS] decodificar: direccion del salto J
   [PASS] funct de syscall
+  [PASS] la palabra 0 es NOP
+  [PASS] decodificar palabra 0 -> nop
+-- Instruccion HALT --
+  [PASS] opcode de halt = 0x3F
+  [PASS] decodificar: opcode HALT
+  [PASS] esHalt() es true
+  [PASS] halt no es NOP
+  [PASS] halt ocupa una instruccion
+  [PASS] la ultima palabra es HALT
 -- ProgramaBuilder --
   [PASS] 3 instrucciones generadas
   [PASS] cargarConstante(42) usa addiu
@@ -103,14 +133,14 @@ Plan de pruebas del simulador MIPS
 
 ==================================================
  RESUMEN PRUEBAS UNITARIAS
- Pasadas: 89   Fallidas: 0
+ Pasadas: 117   Fallidas: 0
 ==================================================
 
 == Pruebas de integracion ==
-=== PRUEBAS DE INTEGRACION - Simulador MIPS ===
+=== PRUEBAS DE INTEGRACION - Emulador MIPS ===
 
 -- Integracion: carga en ROM --
-  [PASS] ROM tiene 5 instrucciones
+  [PASS] ROM tiene 4 instrucciones
   [PASS] ROM bloqueada despues de cargar
   [PASS] PC inicia en 0
   [PASS] instruccion 0 en ROM == generada
@@ -119,7 +149,7 @@ Plan de pruebas del simulador MIPS
   [PASS] $t1 = 32
   [PASS] $t2 = 10+32 = 42
   [PASS] $t3 = 32-10 = 22
-  [PASS] programa detenido por syscall exit
+  [PASS] programa detenido por HALT
   [PASS] andi 0xFF & 0x0F = 0x0F
   [PASS] ori
   [PASS] xor 0x0F ^ 0xF0 = 0xFF
@@ -153,14 +183,25 @@ Plan de pruebas del simulador MIPS
   [PASS] 7%6 resto = 1
   [PASS] LO = 1 tras div
   [PASS] HI = 1 tras div
+-- Integracion: la CPU nunca muere --
+  [PASS] $t0 = 42 tras la unica instruccion real
+  [PASS] ejecuta los 50 ciclos pedidos
+  [PASS] sin HALT la CPU no se detiene
+  [PASS] PC circular: busca en 0 y queda en 1
+  [PASS] ejecutar() sin HALT agota el limite de seguridad
+  [PASS] limite de seguridad de ciclos
+-- Integracion: HALT detiene la CPU --
+  [PASS] HALT detiene la CPU
+  [PASS] instruccion posterior a HALT no se ejecuta
+  [PASS] ciclos = 2 (addiu + halt)
 
 ==================================================
  RESUMEN PRUEBAS DE INTEGRACION
- Pasadas: 35   Fallidas: 0
+ Pasadas: 44   Fallidas: 0
 ==================================================
 
 == Pruebas de sistema ==
-=== PRUEBAS DE SISTEMA - Simulador MIPS ===
+=== PRUEBAS DE SISTEMA - Emulador MIPS ===
 
 -- Sistema: sumatoria --
   [PASS] sumatoria: se construye sin error
@@ -188,32 +229,32 @@ Plan de pruebas del simulador MIPS
 Sumatoria de 3 a 10 = 52
   [PASS] sumatoria: termina (detenido=true)
   [PASS] sumatoria: ciclos razonables (<10000)
-  [PASS] sumatoria: termina con syscall exit (PC dentro de ROM)
+  [PASS] sumatoria: termina por HALT (PC dentro del mapa)
   [PASS] factorial: se construye sin error
   [PASS] factorial: cabe en la ROM (<=100 instrucciones)
 Factorial de 7 = 5040
   [PASS] factorial: termina (detenido=true)
   [PASS] factorial: ciclos razonables (<10000)
-  [PASS] factorial: termina con syscall exit (PC dentro de ROM)
+  [PASS] factorial: termina por HALT (PC dentro del mapa)
   [PASS] integral: se construye sin error
   [PASS] integral: cabe en la ROM (<=100 instrucciones)
 Integral de x^2 dx desde x=1 hasta x=5 = 30
   [PASS] integral: termina (detenido=true)
   [PASS] integral: ciclos razonables (<10000)
-  [PASS] integral: termina con syscall exit (PC dentro de ROM)
+  [PASS] integral: termina por HALT (PC dentro del mapa)
   [PASS] promedio: se construye sin error
   [PASS] promedio: cabe en la ROM (<=100 instrucciones)
 Vector: 4 8 15 16 23 
 Promedio = 13
   [PASS] promedio: termina (detenido=true)
   [PASS] promedio: ciclos razonables (<10000)
-  [PASS] promedio: termina con syscall exit (PC dentro de ROM)
+  [PASS] promedio: termina por HALT (PC dentro del mapa)
   [PASS] perceptron: se construye sin error
   [PASS] perceptron: cabe en la ROM (<=100 instrucciones)
 z = 3  y = 1
   [PASS] perceptron: termina (detenido=true)
   [PASS] perceptron: ciclos razonables (<10000)
-  [PASS] perceptron: termina con syscall exit (PC dentro de ROM)
+  [PASS] perceptron: termina por HALT (PC dentro del mapa)
 
 ==================================================
  RESUMEN PRUEBAS DE SISTEMA

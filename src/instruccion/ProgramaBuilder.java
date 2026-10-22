@@ -1,4 +1,6 @@
-package mips;
+package instruccion;
+
+import memoria.RAM;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,8 +13,12 @@ import java.util.Map;
  *
  * Las etiquetas de codigo se resuelven al generar(); las direcciones de
  * datos se obtienen al registrar cada elemento (palabra, cadena, reserva).
+ * Todo programa debe terminar con halt() para que la CPU sepa que acabo.
  */
 public class ProgramaBuilder {
+
+    /** Capacidad del segmento de texto (ROM): 100 instrucciones. */
+    public static final int ROM_MAX = 100;
 
     // Registros
     public static final int ZERO = 0;
@@ -86,13 +92,13 @@ public class ProgramaBuilder {
     public int palabra(int valor) {
         reservarCeldas(1);
         datos.add(valor);
-        return MemoriaSistema.BASE_RAM + datos.size() - 1;
+        return RAM.DIRECCION_BASE + datos.size() - 1;
     }
 
     /** Reserva una cadena terminada en nulo y devuelve su direccion. */
     public int cadena(String texto) {
         reservarCeldas(texto.length() + 1);
-        int direccion = MemoriaSistema.BASE_RAM + datos.size();
+        int direccion = RAM.DIRECCION_BASE + datos.size();
         for (int i = 0; i < texto.length(); i++) {
             datos.add((int) texto.charAt(i));
         }
@@ -103,7 +109,7 @@ public class ProgramaBuilder {
     /** Reserva n celdas en cero y devuelve la direccion de la primera. */
     public int reservar(int celdas) {
         reservarCeldas(celdas);
-        int direccion = MemoriaSistema.BASE_RAM + datos.size();
+        int direccion = RAM.DIRECCION_BASE + datos.size();
         for (int i = 0; i < celdas; i++) {
             datos.add(0);
         }
@@ -111,7 +117,7 @@ public class ProgramaBuilder {
     }
 
     private void reservarCeldas(int celdas) {
-        if (datos.size() + celdas > 100) {
+        if (datos.size() + celdas > RAM.CELDAS) {
             throw new IllegalStateException("Los datos exceden la capacidad de la RAM (100 celdas)");
         }
     }
@@ -130,121 +136,127 @@ public class ProgramaBuilder {
     }
 
     public ProgramaBuilder add(int rd, int rs, int rt) {
-        return r(Instruccion.FUNCT_ADD, rd, rs, rt, 0);
+        return r(Funct.ADD, rd, rs, rt, 0);
     }
 
     public ProgramaBuilder addu(int rd, int rs, int rt) {
-        return r(Instruccion.FUNCT_ADDU, rd, rs, rt, 0);
+        return r(Funct.ADDU, rd, rs, rt, 0);
     }
 
     public ProgramaBuilder sub(int rd, int rs, int rt) {
-        return r(Instruccion.FUNCT_SUB, rd, rs, rt, 0);
+        return r(Funct.SUB, rd, rs, rt, 0);
     }
 
     public ProgramaBuilder subu(int rd, int rs, int rt) {
-        return r(Instruccion.FUNCT_SUBU, rd, rs, rt, 0);
+        return r(Funct.SUBU, rd, rs, rt, 0);
     }
 
     public ProgramaBuilder and(int rd, int rs, int rt) {
-        return r(Instruccion.FUNCT_AND, rd, rs, rt, 0);
+        return r(Funct.AND, rd, rs, rt, 0);
     }
 
     public ProgramaBuilder or(int rd, int rs, int rt) {
-        return r(Instruccion.FUNCT_OR, rd, rs, rt, 0);
+        return r(Funct.OR, rd, rs, rt, 0);
     }
 
     public ProgramaBuilder xor(int rd, int rs, int rt) {
-        return r(Instruccion.FUNCT_XOR, rd, rs, rt, 0);
+        return r(Funct.XOR, rd, rs, rt, 0);
     }
 
     public ProgramaBuilder nor(int rd, int rs, int rt) {
-        return r(Instruccion.FUNCT_NOR, rd, rs, rt, 0);
+        return r(Funct.NOR, rd, rs, rt, 0);
     }
 
     /** rd = 1 si rs < rt (con signo), 0 en otro caso. */
     public ProgramaBuilder slt(int rd, int rs, int rt) {
-        return r(Instruccion.FUNCT_SLT, rd, rs, rt, 0);
+        return r(Funct.SLT, rd, rs, rt, 0);
     }
 
     /** rd = 1 si rs < rt (sin signo), 0 en otro caso. */
     public ProgramaBuilder sltu(int rd, int rs, int rt) {
-        return r(Instruccion.FUNCT_SLTU, rd, rs, rt, 0);
+        return r(Funct.SLTU, rd, rs, rt, 0);
     }
 
     public ProgramaBuilder sll(int rd, int rt, int shamt) {
-        emitir(Instruccion.codificarR(Instruccion.OP_R, 0, rt, rd, shamt, Instruccion.FUNCT_SLL));
+        emitir(Instruccion.codificarR(Opcode.R.codigo, 0, rt, rd, shamt, Funct.SLL.codigo));
         return this;
     }
 
     public ProgramaBuilder srl(int rd, int rt, int shamt) {
-        emitir(Instruccion.codificarR(Instruccion.OP_R, 0, rt, rd, shamt, Instruccion.FUNCT_SRL));
+        emitir(Instruccion.codificarR(Opcode.R.codigo, 0, rt, rd, shamt, Funct.SRL.codigo));
         return this;
     }
 
     public ProgramaBuilder mult(int rs, int rt) {
-        return r(Instruccion.FUNCT_MULT, 0, rs, rt, 0);
+        return r(Funct.MULT, 0, rs, rt, 0);
     }
 
     public ProgramaBuilder div(int rs, int rt) {
-        return r(Instruccion.FUNCT_DIV, 0, rs, rt, 0);
+        return r(Funct.DIV, 0, rs, rt, 0);
     }
 
     public ProgramaBuilder mflo(int rd) {
-        emitir(Instruccion.codificarR(Instruccion.OP_R, 0, 0, rd, 0, Instruccion.FUNCT_MFLO));
+        emitir(Instruccion.codificarR(Opcode.R.codigo, 0, 0, rd, 0, Funct.MFLO.codigo));
         return this;
     }
 
     public ProgramaBuilder mfhi(int rd) {
-        emitir(Instruccion.codificarR(Instruccion.OP_R, 0, 0, rd, 0, Instruccion.FUNCT_MFHI));
+        emitir(Instruccion.codificarR(Opcode.R.codigo, 0, 0, rd, 0, Funct.MFHI.codigo));
         return this;
     }
 
     public ProgramaBuilder jr(int rs) {
-        return r(Instruccion.FUNCT_JR, 0, rs, 0, 0);
+        return r(Funct.JR, 0, rs, 0, 0);
     }
 
     public ProgramaBuilder syscall() {
-        return r(Instruccion.FUNCT_SYSCALL, 0, 0, 0, 0);
+        return r(Funct.SYSCALL, 0, 0, 0, 0);
+    }
+
+    /** Instruccion de alto: le indica a la CPU que el programa termino. */
+    public ProgramaBuilder halt() {
+        emitir(Instruccion.codificarHalt());
+        return this;
     }
 
     public ProgramaBuilder addi(int rt, int rs, int imm) {
-        return i(Instruccion.OP_ADDI, rs, rt, imm);
+        return i(Opcode.ADDI, rs, rt, imm);
     }
 
     public ProgramaBuilder addiu(int rt, int rs, int imm) {
-        return i(Instruccion.OP_ADDIU, rs, rt, imm);
+        return i(Opcode.ADDIU, rs, rt, imm);
     }
 
     public ProgramaBuilder andi(int rt, int rs, int imm) {
-        return i(Instruccion.OP_ANDI, rs, rt, imm);
+        return i(Opcode.ANDI, rs, rt, imm);
     }
 
     public ProgramaBuilder ori(int rt, int rs, int imm) {
-        return i(Instruccion.OP_ORI, rs, rt, imm);
+        return i(Opcode.ORI, rs, rt, imm);
     }
 
     public ProgramaBuilder xori(int rt, int rs, int imm) {
-        return i(Instruccion.OP_XORI, rs, rt, imm);
+        return i(Opcode.XORI, rs, rt, imm);
     }
 
     public ProgramaBuilder slti(int rt, int rs, int imm) {
-        return i(Instruccion.OP_SLTI, rs, rt, imm);
+        return i(Opcode.SLTI, rs, rt, imm);
     }
 
     public ProgramaBuilder sltiu(int rt, int rs, int imm) {
-        return i(Instruccion.OP_SLTIU, rs, rt, imm);
+        return i(Opcode.SLTIU, rs, rt, imm);
     }
 
     public ProgramaBuilder lui(int rt, int imm) {
-        return i(Instruccion.OP_LUI, 0, rt, imm);
+        return i(Opcode.LUI, 0, rt, imm);
     }
 
     public ProgramaBuilder lw(int rt, int base, int offset) {
-        return i(Instruccion.OP_LW, base, rt, offset);
+        return i(Opcode.LW, base, rt, offset);
     }
 
     public ProgramaBuilder sw(int rt, int base, int offset) {
-        return i(Instruccion.OP_SW, base, rt, offset);
+        return i(Opcode.SW, base, rt, offset);
     }
 
     /** lw con direccion absoluta (base $zero). */
@@ -258,26 +270,26 @@ public class ProgramaBuilder {
     }
 
     public ProgramaBuilder beq(int rs, int rt, String destino) {
-        pendientes.add(new RamaPendiente(codigo.size(), Instruccion.OP_BEQ, rs, rt, destino, false));
-        emitir(Instruccion.codificarI(Instruccion.OP_BEQ, rs, rt, 0));
+        pendientes.add(new RamaPendiente(codigo.size(), Opcode.BEQ.codigo, rs, rt, destino, false));
+        emitir(Instruccion.codificarI(Opcode.BEQ.codigo, rs, rt, 0));
         return this;
     }
 
     public ProgramaBuilder bne(int rs, int rt, String destino) {
-        pendientes.add(new RamaPendiente(codigo.size(), Instruccion.OP_BNE, rs, rt, destino, false));
-        emitir(Instruccion.codificarI(Instruccion.OP_BNE, rs, rt, 0));
+        pendientes.add(new RamaPendiente(codigo.size(), Opcode.BNE.codigo, rs, rt, destino, false));
+        emitir(Instruccion.codificarI(Opcode.BNE.codigo, rs, rt, 0));
         return this;
     }
 
     public ProgramaBuilder j(String destino) {
-        pendientes.add(new RamaPendiente(codigo.size(), Instruccion.OP_J, 0, 0, destino, true));
-        emitir(Instruccion.codificarJ(Instruccion.OP_J, 0));
+        pendientes.add(new RamaPendiente(codigo.size(), Opcode.J.codigo, 0, 0, destino, true));
+        emitir(Instruccion.codificarJ(Opcode.J.codigo, 0));
         return this;
     }
 
     public ProgramaBuilder jal(String destino) {
-        pendientes.add(new RamaPendiente(codigo.size(), Instruccion.OP_JAL, 0, 0, destino, true));
-        emitir(Instruccion.codificarJ(Instruccion.OP_JAL, 0));
+        pendientes.add(new RamaPendiente(codigo.size(), Opcode.JAL.codigo, 0, 0, destino, true));
+        emitir(Instruccion.codificarJ(Opcode.JAL.codigo, 0));
         return this;
     }
 
@@ -330,18 +342,18 @@ public class ProgramaBuilder {
         return new Programa(cod, dat);
     }
 
-    private ProgramaBuilder r(int funct, int rd, int rs, int rt, int shamt) {
-        emitir(Instruccion.codificarR(Instruccion.OP_R, rs, rt, rd, shamt, funct));
+    private ProgramaBuilder r(Funct funct, int rd, int rs, int rt, int shamt) {
+        emitir(Instruccion.codificarR(Opcode.R.codigo, rs, rt, rd, shamt, funct.codigo));
         return this;
     }
 
-    private ProgramaBuilder i(int opcode, int rs, int rt, int imm) {
-        emitir(Instruccion.codificarI(opcode, rs, rt, imm));
+    private ProgramaBuilder i(Opcode opcode, int rs, int rt, int imm) {
+        emitir(Instruccion.codificarI(opcode.codigo, rs, rt, imm));
         return this;
     }
 
     private void emitir(int instr) {
-        if (codigo.size() >= 100) {
+        if (codigo.size() >= ROM_MAX) {
             throw new IllegalStateException("El programa excede la capacidad de la ROM (100 instrucciones)");
         }
         codigo.add(instr);

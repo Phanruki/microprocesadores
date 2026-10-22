@@ -1,0 +1,40 @@
+
+Práctica 2. Emulador básico de un procesador.
+
+Objetivo: 
+Diseñar, implementar y evaluar un emulador educativo de un procesador en lenguaje Java, que permita comprender los principios fundamentales de la arquitectura de microprocesadores, mediante la construcción modular de unidades funcionales (almacenamiento, ALU, control de flujo), la incorporación de instrucciones aritméticas, lógicas y de control, y la validación del sistema a través de pruebas técnicas, de integración y de usuario final.
+Metodología de trabajo
+Paso 1. Arquitectura del sistema de almacenamiento de datos.
+Ancho de palabra (ver arquitectura del procesador)
+Registros del procesador  (ver arquitectura del procesador)
+Contador de programa
+El PC de 32 bits contiene la dirección de la siguiente instrucción a ejecutar.
+• Durante la búsqueda de instrucciones, el PC se incrementa para apuntar a la siguiente instrucción.
+Disco duro
+Crear una copia de la clase “unidad de almacenamiento” y llamarla “DiscoDuro”
+Ajustar el ancho de palabra a 32 bits.
+Ajustar la cantidad de celdas de almacenamiento a 100.
+RAM
+Ajustar el ancho de palabra a 32 bits.
+Ajustar la cantidad de celdas de almacenamiento a 100.
+ROM
+Ajustar el ancho de palabra a 32 bits.
+Ajustar la cantidad de celdas de almacenamiento a 100.
+Paso 2: ALU
+Seleccionar el procesador a emular
+[   ] RISC-V               [    ] MIPS                    [    ] x86            [    ] M1             [    ] AMD
+Paso 3. Pruebas técnicas al emulador del procesador MIPS
+PROMPT: Analiza las siguientes clases. <CÓDIGO>
+PROMPT: Genera un plan de pruebas para el emulador del procesador MIPS. 
+PROMPT: Genera un plan de pruebas de integración de código para el emulador de procesador MIPS. 
+PROMPT: Genera un plan de pruebas de sistema para el código para el emulador del procesador MIPS. 
+Paso 4. Pruebas de usuario final. 
+Genera un código en el lenguaje de programación para el procesador MIPS. 
+Sumatoria desde un número inicial a uno final. 
+Factorial de un número. 
+Integral definida desde un punto inicial a uno final. 
+Promedio de un vector fijo de elementos. 
+Cálculo de un perceptrón con entradas fijas.
+Capturar pantallas al inicio y al final de cada ejecución del código. 
+PROMPT.
+A continuación te paso una lista de instrucciones del procesador MIPS que puedo compilar en mi emulador del procesador MIPS. Genera un código en lenguaje ensamblador para el procesador MIPS que implemente el factorial de un número. Incluye la explicación de cada línea de código. Sólo utiliza las instrucciones que te muestro a continuación. 

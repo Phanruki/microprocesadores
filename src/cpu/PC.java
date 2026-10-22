@@ -1,4 +1,4 @@
-package almacenamiento;
+package cpu;
 
 /**
  * Contador de programa (PC) de 32 bits.
@@ -6,17 +6,17 @@ package almacenamiento;
  * Durante la busqueda de instrucciones el PC se incrementa para apuntar
  * a la siguiente instruccion.
  */
-public class ContadorPrograma {
+public class PC {
 
     public static final int ANCHO = 32;
 
     private int valor;
 
-    public ContadorPrograma() {
+    public PC() {
         this.valor = 0;
     }
 
-    public ContadorPrograma(int valorInicial) {
+    public PC(int valorInicial) {
         this.valor = valorInicial;
     }
 
@@ -33,6 +33,7 @@ public class ContadorPrograma {
         this.valor = this.valor + 1;
     }
 
+    /** El PC arranca siempre en 0 al encender o reiniciar la CPU. */
     public void reiniciar() {
         this.valor = 0;
     }

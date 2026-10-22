@@ -1,15 +1,15 @@
 package programas;
 
-import mips.ProgramaBuilder;
+import instruccion.ProgramaBuilder;
 
-import static mips.ProgramaBuilder.T0;
-import static mips.ProgramaBuilder.T1;
-import static mips.ProgramaBuilder.T2;
-import static mips.ProgramaBuilder.T4;
-import static mips.ProgramaBuilder.T5;
-import static mips.ProgramaBuilder.T6;
-import static mips.ProgramaBuilder.T7;
-import static mips.ProgramaBuilder.ZERO;
+import static instruccion.ProgramaBuilder.T0;
+import static instruccion.ProgramaBuilder.T1;
+import static instruccion.ProgramaBuilder.T2;
+import static instruccion.ProgramaBuilder.T4;
+import static instruccion.ProgramaBuilder.T5;
+import static instruccion.ProgramaBuilder.T6;
+import static instruccion.ProgramaBuilder.T7;
+import static instruccion.ProgramaBuilder.ZERO;
 
 /**
  * Promedio entero de un vector fijo.

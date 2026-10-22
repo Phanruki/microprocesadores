@@ -1,4 +1,4 @@
-package almacenamiento;
+package memoria;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -7,16 +7,23 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 /**
- * Disco duro: copia de la unidad de almacenamiento con ancho de palabra de
- * 32 bits y 100 celdas. Ademas permite persistir su contenido en un archivo.
+ * Disco duro: segmento de almacenamiento persistente del simulador.
+ *
+ * Copia de la unidad de almacenamiento con ancho de palabra de 32 bits
+ * y 100 celdas, en las direcciones 200..299 del mapa de memoria.
+ * Ademas permite persistir su contenido en un archivo.
  */
 public class DiscoDuro extends UnidadAlmacenamiento {
 
     public static final int ANCHO_PALABRA = 32;
     public static final int CELDAS = 100;
 
+    /** Segmento de almacenamiento a largo plazo. */
+    public static final String NOMBRE = "disco";
+    public static final int DIRECCION_BASE = 200;
+
     public DiscoDuro() {
-        super(ANCHO_PALABRA, CELDAS);
+        super(NOMBRE, DIRECCION_BASE, ANCHO_PALABRA, CELDAS);
     }
 
     /** Guarda el contenido del disco en un archivo de texto (una celda por linea). */

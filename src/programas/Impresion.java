@@ -1,11 +1,11 @@
 package programas;
 
-import mips.ProgramaBuilder;
+import instruccion.ProgramaBuilder;
 
-import static mips.ProgramaBuilder.A0;
-import static mips.ProgramaBuilder.V0;
+import static instruccion.ProgramaBuilder.A0;
+import static instruccion.ProgramaBuilder.V0;
 
-/** Secuencias de syscall para imprimir y terminar. */
+/** Secuencias de syscall para imprimir y la instruccion HALT para terminar. */
 public final class Impresion {
 
     private Impresion() {
@@ -25,9 +25,8 @@ public final class Impresion {
         p.syscall();
     }
 
-    /** Detiene la ejecucion del procesador. */
+    /** Termina el programa: la instruccion HALT le avisa a la CPU. */
     public static void terminar(ProgramaBuilder p) {
-        p.cargarConstante(V0, 10);
-        p.syscall();
+        p.halt();
     }
 }

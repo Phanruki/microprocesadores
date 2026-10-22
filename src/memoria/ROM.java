@@ -1,19 +1,25 @@
-package almacenamiento;
+package memoria;
 
 /**
- * ROM: ancho de palabra de 32 bits y 100 celdas de almacenamiento.
- * Almacena el programa (instrucciones). Puede bloquearse tras la carga
- * para impedir escrituras accidentales.
+ * ROM: segmento de texto del simulador.
+ *
+ * Guarda el programa (instrucciones). Ancho de palabra de 32 bits y
+ * 100 celdas, en las direcciones 0..99 del mapa de memoria. Se bloquea
+ * tras la carga para impedir escrituras accidentales.
  */
 public class ROM extends UnidadAlmacenamiento {
 
     public static final int ANCHO_PALABRA = 32;
     public static final int CELDAS = 100;
 
+    /** Segmento de texto: la CPU busca las instrucciones aqui. */
+    public static final String NOMBRE = "texto";
+    public static final int DIRECCION_BASE = 0;
+
     private boolean bloqueada;
 
     public ROM() {
-        super(ANCHO_PALABRA, CELDAS);
+        super(NOMBRE, DIRECCION_BASE, ANCHO_PALABRA, CELDAS);
         this.bloqueada = false;
     }
 

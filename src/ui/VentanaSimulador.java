@@ -1,6 +1,14 @@
-package mips;
+package ui;
 
-import almacenamiento.Registros;
+import cpu.CPU;
+import ejecucion.SenalesControl;
+import instruccion.Binario;
+import instruccion.Desensamblador;
+import instruccion.Funct;
+import instruccion.Instruccion;
+import instruccion.Opcode;
+import memoria.RAM;
+import memoria.Registros;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -31,11 +39,11 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 /**
- * Ventana grafica del simulador del procesador MIPS (Practica 2).
+ * Ventana grafica del emulador del procesador MIPS (Practica 2).
  *
  * Campos:
  *   - Instrucciones (Binario): entrada de instrucciones en binario (32 bits)
- *   - Historial: ciclo, PC, instruccion, operacion y PC siguiente
+ *   - Historial: ciclo, PC, instruccion, operacion, senales y PC siguiente
  *   - Registros: nombre = binario
  *   - RAM: nombre (direccion) = binario
  *   - Estado CPU: PC, HI y LO en binario
@@ -44,7 +52,7 @@ public class VentanaSimulador extends JFrame {
 
     private static final int LIMITE_CICLOS = 10000;
 
-    private final ProcesadorMIPS cpu = new ProcesadorMIPS();
+    private final CPU cpu = new CPU();
 
     private final JTextArea entrada = new JTextArea(4, 46);
     private final JTextArea historial = new JTextArea();
@@ -57,11 +65,10 @@ public class VentanaSimulador extends JFrame {
     private final JLabel barraEstado = new JLabel("Listo.");
     private final JLabel barraCiclos = new JLabel();
 
-    private int limitePrograma;
     private String ultimaCarga;
 
     public VentanaSimulador() {
-        super("Simulador MIPS - Practica 2");
+        super("Emulador MIPS - Practica 2");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(6, 6));
         add(construirEntrada(), BorderLayout.NORTH);
@@ -229,21 +236,16 @@ public class VentanaSimulador extends JFrame {
             ultimaCarga = entrada.getText();
         }
 
-        int limite = Math.max(cpu.longitudPrograma(), limitePrograma);
         int ejecutados = 0;
         String motivo = null;
 
+        // La CPU nunca muere: si no hay HALT sigue ejecutando NOPs (0000...).
         while (!cpu.isDetenido() && ejecutados < maxCiclos) {
             int pcActual = cpu.getPc().get();
-            if (pcActual < 0 || pcActual >= cpu.getRom().getCantidadCeldas()) {
-                motivo = "PC fuera de la ROM (" + pcActual + ")";
-                break;
+            if (pcActual < 0 || pcActual >= cpu.getMemoria().totalCeldas()) {
+                pcActual = 0; // el PC es circular
             }
-            int instruccion = cpu.getRom().leer(pcActual);
-            if (instruccion == 0 && pcActual >= limite) {
-                motivo = "final del programa";
-                break;
-            }
+            int instruccion = cpu.getMemoria().leer(pcActual);
 
             long ciclo = cpu.getCiclos() + 1;
             String ensamblador = Desensamblador.mnemonico(instruccion, pcActual);
@@ -254,19 +256,20 @@ public class VentanaSimulador extends JFrame {
                 cpu.ciclo();
             } catch (RuntimeException ex) {
                 registrar(ciclo, pcActual, binario, ensamblador,
-                        "ERROR: " + ex.getMessage(), cpu.getPc().get());
+                        "ERROR: " + ex.getMessage(), null, cpu.getPc().get());
                 estado("Ciclo " + ciclo + " - ERROR: " + ex.getMessage());
                 actualizar();
                 return;
             }
-            registrar(ciclo, pcActual, binario, ensamblador, operacion, cpu.getPc().get());
+            SenalesControl senales = cpu.getSenalesActuales();
+            registrar(ciclo, pcActual, binario, ensamblador, operacion, senales, cpu.getPc().get());
             ejecutados++;
         }
 
-        if (motivo == null && cpu.isDetenido()) {
-            motivo = "CPU detenida (syscall exit)";
-        } else if (motivo == null && ejecutados >= maxCiclos && maxCiclos == LIMITE_CICLOS) {
-            motivo = "limite de " + LIMITE_CICLOS + " ciclos alcanzado";
+        if (cpu.isDetenido()) {
+            motivo = "CPU detenida (instruccion HALT o syscall exit)";
+        } else if (ejecutados >= maxCiclos && maxCiclos == LIMITE_CICLOS) {
+            motivo = "limite de " + LIMITE_CICLOS + " ciclos alcanzado (el programa no tiene HALT)";
         }
 
         actualizar();
@@ -309,17 +312,17 @@ public class VentanaSimulador extends JFrame {
             return false;
         }
         cpu.getRom().cargarPrograma(palabras, direccion);
-        limitePrograma = Math.max(limitePrograma, direccion + palabras.length);
         return true;
     }
 
     private void registrar(long ciclo, int pc, String binario, String ensamblador,
-                           String operacion, int pcSiguiente) {
+                           String operacion, SenalesControl senales, int pcSiguiente) {
         StringBuilder sb = new StringBuilder();
         sb.append("Ciclo: ").append(ciclo).append('\n');
         sb.append("PC: ").append(Binario.a32(pc)).append('\n');
         sb.append("Instruccion: ").append(ensamblador).append('\n');
         sb.append("Binario: ").append(binario).append('\n');
+        sb.append("Senales: ").append(senales == null ? "-" : senales.toString()).append('\n');
         sb.append("Operacion: ").append(operacion).append('\n');
         sb.append("PC Siguiente: ").append(Binario.a32(pcSiguiente)).append('\n');
         sb.append("--------------------------------------------------\n");
@@ -329,27 +332,28 @@ public class VentanaSimulador extends JFrame {
 
     private void reiniciarCpu() {
         cpu.reiniciar();
-        limitePrograma = 0;
         ultimaCarga = null;
         historial.setText("");
         actualizar();
-        estado("CPU reiniciada: ROM, RAM, registros, PC, HI y LO a cero");
+        estado("CPU reiniciada: PC = 0 y segmentos de memoria en 0x00000000");
     }
 
     private void cargarEjemplo() {
         int[] ejemplo = {
-            Instruccion.codificarI(Instruccion.OP_ADDI, 0, 8, 10),
-            Instruccion.codificarI(Instruccion.OP_ADDI, 0, 9, 3),
-            Instruccion.codificarR(Instruccion.OP_R, 8, 9, 10, 0, Instruccion.FUNCT_ADD),
-            Instruccion.codificarI(Instruccion.OP_SW, 0, 10, MemoriaSistema.BASE_RAM),
-            Instruccion.codificarI(Instruccion.OP_LW, 0, 11, MemoriaSistema.BASE_RAM)
+            Instruccion.codificarI(Opcode.ADDI.codigo, 0, 8, 10),
+            Instruccion.codificarI(Opcode.ADDI.codigo, 0, 9, 3),
+            Instruccion.codificarR(Opcode.R.codigo, 8, 9, 10, 0, Funct.ADD.codigo),
+            Instruccion.codificarI(Opcode.SW.codigo, 0, 10, RAM.DIRECCION_BASE),
+            Instruccion.codificarI(Opcode.LW.codigo, 0, 11, RAM.DIRECCION_BASE),
+            Instruccion.codificarHalt()
         };
         String[] comentarios = {
             "addi $t0, $zero, 10",
             "addi $t1, $zero, 3",
             "add $t2, $t0, $t1",
-            "sw $t2, 100($zero)",
-            "lw $t3, 100($zero)"
+            "sw $t2, 100($zero)   # RAM dir 100",
+            "lw $t3, 100($zero)",
+            "halt                 # alto: la CPU se detiene"
         };
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < ejemplo.length; i++) {
@@ -357,7 +361,7 @@ public class VentanaSimulador extends JFrame {
         }
         entrada.setText(sb.toString());
         entrada.setCaretPosition(0);
-        estado("Ejemplo cargado en el campo de instrucciones");
+        estado("Ejemplo cargado en el campo de instrucciones (termina con HALT)");
     }
 
     private void actualizar() {
@@ -369,10 +373,10 @@ public class VentanaSimulador extends JFrame {
         registros.setCaretPosition(0);
 
         int[] celdas = cpu.getRam().obtenerCeldas();
-        StringBuilder rb = new StringBuilder(celdas.length * 52);
+        StringBuilder rb = new StringBuilder(celdas.length * 62);
         for (int i = 0; i < celdas.length; i++) {
-            rb.append(String.format("RAM[%d] (%d) = %s%n",
-                    i, MemoriaSistema.BASE_RAM + i, Binario.a32(celdas[i])));
+            rb.append(String.format("RAM[%d] (dir %d / 0x%08X) = %s%n",
+                    i, RAM.DIRECCION_BASE + i, RAM.DIRECCION_BASE + i, Binario.a32(celdas[i])));
         }
         ram.setText(rb.toString());
         ram.setCaretPosition(0);

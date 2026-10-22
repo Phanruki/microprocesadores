@@ -1,9 +1,10 @@
 package pruebas;
 
-import mips.MemoriaSistema;
-import mips.ProcesadorMIPS;
-import mips.ProgramaBuilder;
-import mips.ProgramaBuilder.Programa;
+import memoria.MemoriaSistema;
+import memoria.RAM;
+import cpu.CPU;
+import instruccion.ProgramaBuilder;
+import instruccion.ProgramaBuilder.Programa;
 import programas.Factorial;
 import programas.Integral;
 import programas.Perceptron;
@@ -18,7 +19,7 @@ import programas.Sumatoria;
 public class PruebasSistema {
 
     public static void main(String[] args) {
-        System.out.println("=== PRUEBAS DE SISTEMA - Simulador MIPS ===");
+        System.out.println("=== PRUEBAS DE SISTEMA - Emulador MIPS ===");
         System.out.println();
 
         probarPrograma("sumatoria", Sumatoria.construir(), "Sumatoria de 3 a 10 = 52\n");
@@ -35,15 +36,15 @@ public class PruebasSistema {
         System.exit(fallidas == 0 ? 0 : 1);
     }
 
-    private static ProcesadorMIPS construirYcargar(ProgramaBuilder pb, String nombre) {
+    private static CPU construirYcargar(ProgramaBuilder pb, String nombre) {
         Programa prog = pb.generar();
         MiniTest.assertTrue(nombre + ": se construye sin error", prog.codigo.length > 0);
         MiniTest.assertTrue(nombre + ": cabe en la ROM (<=100 instrucciones)",
                 prog.codigo.length <= 100);
-        ProcesadorMIPS cpu = new ProcesadorMIPS();
+        CPU cpu = new CPU();
         cpu.cargarPrograma(prog.codigo);
         for (int i = 0; i < prog.datos.length; i++) {
-            cpu.getMemoria().escribir(MemoriaSistema.BASE_RAM + i, prog.datos[i]);
+            cpu.getMemoria().escribir(RAM.DIRECCION_BASE + i, prog.datos[i]);
         }
         return cpu;
     }
@@ -51,7 +52,7 @@ public class PruebasSistema {
     private static void probarPrograma(String nombre, ProgramaBuilder pb, String salidaEsperada) {
         System.out.println("-- Sistema: " + nombre + " --");
         try {
-            ProcesadorMIPS cpu = construirYcargar(pb, nombre);
+            CPU cpu = construirYcargar(pb, nombre);
             cpu.capturarSalida();
             try {
                 cpu.ejecutar();
@@ -74,13 +75,13 @@ public class PruebasSistema {
         for (int i = 0; i < programas.length; i++) {
             String n = nombres[i];
             try {
-                ProcesadorMIPS cpu = construirYcargar(programas[i], n);
+                CPU cpu = construirYcargar(programas[i], n);
                 cpu.ejecutar();
                 MiniTest.assertTrue(n + ": termina (detenido=true)", cpu.isDetenido());
                 MiniTest.assertTrue(n + ": ciclos razonables (<10000)",
                         cpu.getCiclos() > 0 && cpu.getCiclos() < 10000);
-                MiniTest.assertTrue(n + ": termina con syscall exit (PC dentro de ROM)",
-                        cpu.getPc().get() >= 0 && cpu.getPc().get() < 100);
+                MiniTest.assertTrue(n + ": termina por HALT (PC dentro del mapa)",
+                        cpu.getPc().get() >= 0 && cpu.getPc().get() < 300);
             } catch (Exception e) {
                 MiniTest.assertTrue(n + ": finaliza sin error (" + e + ")", false);
             }

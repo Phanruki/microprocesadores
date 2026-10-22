@@ -1,7 +1,7 @@
 # Conjunto de instrucciones del simulador MIPS
 
 Instrucciones que el procesador ejecuta. Cada una se codifica en 32 bits
-con los tres formatos de MIPS (`src/mips/Instruccion.java`).
+con los tres formatos de MIPS (`src/instruccion/Instruccion.java`).
 
 ## Formato R (opcode 0x00)
 
@@ -48,6 +48,21 @@ En `sltu` el operando -1 se interpreta como 4294967295 (valor sin signo).
 Las direcciones son indices de celdas de 32 bits. El offset de beq/bne
 es relativo a la siguiente instruccion.
 
+## Instruccion HALT ("alto", propia del emulador)
+
+| Instruccion | Opcode | Efecto |
+|-------------|--------|--------|
+| `halt` | 0x3F | detiene la CPU: el programa termino |
+
+`halt` no existe en el MIPS real; es una instruccion propia de este emulador
+para que **la CPU nunca muere sola**: siempre ejecuta algo (arranca en 0, donde
+la memoria contiene un NOP), y solo se detiene con `halt` o con el syscall 10
+(terminar). Todos los programas de `src/programas/` terminan con
+`Impresion.terminar(p)`, que emite `halt`.
+
+Se codifica con `Instruccion.codificarHalt()` y se decodifica en
+`instruccion.Opcode.HALT` (`src/instruccion/Opcode.java`).
+
 ## Formato J
 
 | Instruccion | Opcode | Efecto |
@@ -72,7 +87,8 @@ es relativo a la siguiente instruccion.
 
 ## Como se construyen los programas
 
-`mips.ProgramaBuilder` emite estas instrucciones desde Java y resuelve las
-etiquetas de ramas al generar el programa. Los programas de
+`instruccion.ProgramaBuilder` emite estas instrucciones desde Java y resuelve
+las etiquetas de ramas al generar el programa. Los programas de
 `src/programas/` solo usan beq/bne con slt/slti/sltu para comparaciones, y
-prefieren addu/subu/addiu para no provocar desbordamientos.
+prefieren addu/subu/addiu para no provocar desbordamientos. Todo programa
+termina con `halt()` (o syscall 10) para que la CPU sepa que acabo.

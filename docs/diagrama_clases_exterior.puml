@@ -1,0 +1,199 @@
+@startuml diagrama_clases_exterior
+!pragma layout smetana
+title Diagrama de clases: cómo se usa el núcleo desde ui, programas y pruebas
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 70
+skinparam wrapWidth 240
+
+skinparam class {
+    BackgroundColor #FBFBFD
+    BorderColor #4C566A
+    HeaderBackgroundColor #D8DEE9
+    ArrowColor #4C566A
+    FontSize 13
+}
+skinparam package {
+    BackgroundColor #F2F3F7E8
+    BorderColor #8890A0
+    FontSize 15
+}
+skinparam note {
+    BackgroundColor #FFF8E1
+    BorderColor #C9A227
+}
+
+' ==================================================================
+' Núcleo: clases simplificadas (el detalle está en diagrama_clases_nucleo)
+' ==================================================================
+package "nucleo del emulador (ver diagrama_clases_nucleo)" #F8F9FA {
+  class CPU {
+    + ciclo()
+    + ejecutar() : boolean
+    + cargarPrograma(int[])
+    + reiniciar()
+    + detener()
+    + isDetenido() : boolean
+    + getRegistros() : Registros
+    + getMemoria() : MemoriaSistema
+    + getSenalesActuales() : SenalesControl
+    + LIMITE_CICLOS_SEGURIDAD = 100000
+  }
+  class MemoriaSistema {
+    + leer(int) : int
+    + escribir(int, int)
+    + mapa() : String
+  }
+  class Registros {
+    + leer(int) : int
+    + escribir(int, int)
+    + volcar() : String
+  }
+  class RAM {
+    + NOMBRE = "datos"
+    + DIRECCION_BASE = 100
+    + CELDAS = 100
+  }
+  class SenalesControl {
+    + operacionAlu : OperacionALU
+    + leeMemoria : boolean
+    + escribeMemoria : boolean
+    + esHalt : boolean
+    ...
+  }
+  class ProgramaBuilder {
+    + Programa
+    + palabra(int) : int
+    + cadena(String) : int
+    + cargarConstante(int, int) : ProgramaBuilder
+    + mover(int, int) : ProgramaBuilder
+    + syscall() : ProgramaBuilder
+    + halt() : ProgramaBuilder
+    + etiqueta(String) : ProgramaBuilder
+    + generar() : Programa
+  }
+  class ServicioSyscall {
+    IMPRIMIR_ENTERO = 1
+    IMPRIMIR_CADENA = 4
+    LEER_ENTERO = 5
+    IMPRIMIR_CARACTER = 11
+    TERMINAR = 10
+  }
+}
+
+' ==================================================================
+package "programas de prueba (uso del nucleo)" #FFF4E6 {
+  class Impresion {
+    + static cadena(ProgramaBuilder, int) : void
+    + static entero(ProgramaBuilder, int) : void
+    + static terminar(ProgramaBuilder) : void
+  }
+  class Factorial {
+    + static construir() : ProgramaBuilder
+  }
+  class Integral {
+    + static construir() : ProgramaBuilder
+  }
+  class Perceptron {
+    + static construir() : ProgramaBuilder
+  }
+  class Promedio {
+    + static construir() : ProgramaBuilder
+  }
+  class Sumatoria {
+    + static construir() : ProgramaBuilder
+  }
+}
+
+' ==================================================================
+package "pruebas automaticas (validan el nucleo)" #FFEFEF {
+  class EjecutorPruebas {
+    + static main(String[])
+    - static ejecutarSuite(Class) : int
+  }
+  class MiniTest {
+    + static assertTrue(String, boolean)
+    + static assertFalse(String, boolean)
+    + static assertEquals(String, int, int)
+    + static assertEquals(String, String, String)
+    + static capturarSalida(Runnable) : String
+    + static resumen(String) : int
+  }
+  class PruebasUnitarias {
+    + static main(String[])
+  }
+  class PruebasIntegracion {
+    + static main(String[])
+  }
+  class PruebasSistema {
+    + static main(String[])
+  }
+}
+
+' ==================================================================
+package "interfaz (extension externa)" #F0F0F0 {
+  class Simulador {
+    + static main(String[])
+    - static construir(String) : ProgramaBuilder.Programa
+    - static abrirVentana()
+    - static imprimirUso()
+  }
+  class VentanaSimulador extends JFrame {
+    + VentanaSimulador()
+    + static main(String[])
+    - ejecutarCiclos(int)
+    - cargarInstrucciones()
+    - reiniciarCpu()
+    - cargarEjemplo()
+    - actualizar()
+    - registrar(long, int, String, String, String, SenalesControl, int)
+  }
+}
+
+' ==================================================================
+' Relaciones de uso
+' ==================================================================
+Factorial ..> ProgramaBuilder : "construye el codigo"
+Integral ..> ProgramaBuilder
+Perceptron ..> ProgramaBuilder
+Promedio ..> ProgramaBuilder
+Sumatoria ..> ProgramaBuilder
+Factorial ..> Impresion : "imprimir y terminar"
+Integral ..> Impresion
+Perceptron ..> Impresion
+Promedio ..> Impresion
+Sumatoria ..> Impresion
+Impresion ..> ProgramaBuilder : "syscall() y halt()"
+Impresion ..> ServicioSyscall : "servicios 1, 4 y 10"
+
+PruebasUnitarias --|> MiniTest
+PruebasIntegracion --|> PruebasUnitarias
+PruebasSistema --|> PruebasIntegracion
+EjecutorPruebas ..> PruebasUnitarias : "lanza las 3 suites"
+EjecutorPruebas ..> PruebasIntegracion
+EjecutorPruebas ..> PruebasSistema
+
+Simulador ..> CPU : "nueva CPU y ejecutar()"
+Simulador ..> RAM : "carga datos en la RAM"
+Simulador ..> Impresion : "cadenas de los programas"
+Simulador ..> VentanaSimulador : "abre con --gui"
+VentanaSimulador *-right-> CPU : "cada ventana tiene su CPU"
+VentanaSimulador ..> SenalesControl : "historial de senales"
+VentanaSimulador ..> MemoriaSistema : "mapa de memoria"
+
+note bottom of CPU
+  El nucleo no conoce a la interfaz: los paquetes
+  ui, programas y pruebas son clientes externos.
+  Toda la simulacion ocurre dentro de CPU
+  (nunca muere: solo HALT o syscall 10 la paran).
+end note
+
+note right of ProgramaBuilder
+  Los programas se construyen con el ProgramaBuilder
+  (sin escribir binario a mano) y terminan siempre
+  con halt() para que la CPU sepa que acabo.
+end note
+
+@enduml

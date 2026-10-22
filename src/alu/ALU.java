@@ -44,6 +44,8 @@ public class ALU {
                 return a << (shamt & 0x1F);
             case SRL:
                 return a >>> (shamt & 0x1F);
+            case LUI:
+                return b << 16;
             case NOP:
                 return 0;
             default:

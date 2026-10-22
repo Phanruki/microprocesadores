@@ -1,0 +1,401 @@
+@startuml diagrama_clases_nucleo
+!pragma layout smetana
+title Diagrama de clases — Núcleo del emulador MIPS (5 paquetes: cpu, ejecucion, memoria, alu, instruccion)
+
+skinparam defaultFontName "Sans Serif"
+skinparam shadowing true
+skinparam roundcorner 12
+skinparam nodesep 40
+skinparam ranksep 55
+
+skinparam class {
+    BackgroundColor #FBFBFD
+    BorderColor #4C566A
+    HeaderBackgroundColor #D8DEE9
+    ArrowColor #4C566A
+    FontSize 13
+    HeaderFontSize 14
+    stereotypeFontSize 11
+}
+
+skinparam package {
+    BackgroundColor #F2F3F7E8
+    BorderColor #8890A0
+    FontSize 16
+    FontColor #2E3440
+    StereotypeFontSize 10
+}
+
+skinparam note {
+    BackgroundColor #FFF8E1
+    BorderColor #C9A227
+}
+
+' ==================================================================
+package "cpu" <<Rectangle>> {
+    class CPU {
+        - rom : ROM
+        - ram : RAM
+        - disco : DiscoDuro
+        - registros : Registros
+        - pc : PC
+        - alu : ALU
+        - memoria : MemoriaSistema
+        - unidadControl : UnidadControl
+        - ejecutor : EjecutorInstrucciones
+        - hi : long
+        - lo : long
+        - detenido : boolean
+        - ciclos : long
+        --
+        + CPU()
+        + reiniciar() : void
+        + cargarPrograma(programa : int[]) : void
+        + ciclo() : void
+        + ejecutar() : boolean
+        + detener() : void
+        + isDetenido() : boolean
+        + syscall() : void
+        + getCiclos() : long
+        + getHi() : long
+        + getLo() : long
+        --
+        - etapaBusqueda() : void  «IF»
+        - etapaDecodificacion() : void  «ID»
+        - etapaEjecucion() : void  «EX»
+        - etapaMemoria() : void  «MEM»
+        - etapaEscritura() : void  «WB»
+    }
+
+    class PC {
+        + ANCHO : int = 32 {static}
+        - valor : int
+        --
+        + get() : int
+        + set(nuevaDireccion : int) : void
+        + incrementar() : void
+        + reiniciar() : void
+    }
+
+    CPU *-- PC
+}
+
+' ==================================================================
+package "ejecucion" <<Rectangle>> {
+    class EjecutorInstrucciones {
+        - cpu : CPU
+        --
+        + ejecutar(instr : Instruccion, senales : SenalesControl) : void
+        - registroDestino(instr : Instruccion) : int
+    }
+
+    class UnidadControl {
+        + decodificar(instr : Instruccion) : SenalesControl
+        - senalesTipoR(instr : Instruccion) : SenalesControl
+    }
+
+    class SenalesControl {
+        + operacionAlu : OperacionALU
+        + usaInmediato : boolean
+        + inmediatoSinSigno : boolean
+        + escribeRegistro : boolean
+        + leeMemoria : boolean
+        + escribeMemoria : boolean
+        + esRama : boolean
+        + esSalto : boolean
+        + esSaltoRegistro : boolean
+        + actualizaHiLo : boolean
+        + transfiereHi : boolean
+        + transfiereLo : boolean
+        + esSyscall : boolean
+        + esHalt : boolean
+        --
+        + alu(operacion : OperacionALU) : Builder {static}
+    }
+
+    CPU *-- UnidadControl
+    CPU *-- EjecutorInstrucciones
+    EjecutorInstrucciones ..> CPU : usa
+    EjecutorInstrucciones ..> SenalesControl : aplica
+    UnidadControl ..> SenalesControl : genera
+}
+
+' ==================================================================
+package "memoria" <<Rectangle>> {
+    class UnidadAlmacenamiento {
+        # nombre : String
+        # direccionBase : int
+        # anchoPalabra : int
+        # cantidadCeldas : int
+        # celdas : int[]
+        --
+        + UnidadAlmacenamiento(nombre, direccionBase, anchoPalabra, cantidadCeldas)
+        + getNombre() : String
+        + getDireccionBase() : int
+        + getDireccionFinal() : int
+        + contieneAbsoluta(direccion : int) : boolean
+        + aLocal(direccion : int) : int
+        + leer(direccion : int) : int
+        + escribir(direccion : int, valor : int) : void
+        + limpiar() : void
+        + volcar(titulo : String) : String
+    }
+
+    class ROM {
+        + NOMBRE : String = "texto" {static}
+        + DIRECCION_BASE : int = 0 {static}
+        + CELDAS : int = 100 {static}
+        - bloqueada : boolean
+        --
+        + cargarPrograma(programa : int[], direccionBase : int) : void
+        + bloquear() : void
+        + desbloquear() : void
+        + isBloqueada() : boolean
+    }
+
+    class RAM {
+        + NOMBRE : String = "datos" {static}
+        + DIRECCION_BASE : int = 100 {static}
+        + CELDAS : int = 100 {static}
+    }
+
+    class DiscoDuro {
+        + NOMBRE : String = "disco" {static}
+        + DIRECCION_BASE : int = 200 {static}
+        + CELDAS : int = 100 {static}
+        --
+        + guardar(rutaArchivo : String) : void
+        + cargar(rutaArchivo : String) : void
+        + importar(origen : UnidadAlmacenamiento) : void
+        + exportar(destino : UnidadAlmacenamiento) : void
+    }
+
+    class Registros {
+        + CANTIDAD : int = 32 {static}
+        + ANCHO : int = 32 {static}
+        - registros : int[]
+        --
+        + nombre(indice : int) : String {static}
+        + leer(indice : int) : int
+        + escribir(indice : int, valor : int) : void
+        + limpiar() : void
+        + volcar() : String
+    }
+
+    class MemoriaSistema {
+        - segmentos : List<UnidadAlmacenamiento>
+        --
+        + segmentoDe(direccion : int) : UnidadAlmacenamiento
+        + contiene(direccion : int) : boolean
+        + totalCeldas() : int
+        + leer(direccion : int) : int
+        + escribir(direccion : int, valor : int) : void
+        + mapa() : String
+    }
+
+    ROM --|> UnidadAlmacenamiento
+    RAM --|> UnidadAlmacenamiento
+    DiscoDuro --|> UnidadAlmacenamiento
+    MemoriaSistema o-- ROM
+    MemoriaSistema o-- RAM
+    MemoriaSistema o-- DiscoDuro
+
+    CPU *-- Registros
+    CPU *-- MemoriaSistema
+}
+
+' ==================================================================
+package "alu" <<Rectangle>> {
+    class ALU {
+        --
+        + operar(op : OperacionALU, a : int, b : int, shamt : int) : int
+    }
+
+    enum OperacionALU {
+        ADD
+        ADDU
+        SUB
+        SUBU
+        AND
+        OR
+        XOR
+        NOR
+        SLT
+        SLTU
+        SLL
+        SRL
+        LUI
+        NOP
+    }
+
+    CPU *-- ALU
+    ALU ..> OperacionALU : usa
+}
+
+' ==================================================================
+package "instruccion" <<Rectangle>> {
+    class Instruccion {
+        + PALABRA_NOP : int = 0 {static}
+        + palabra : int
+        + formato : FormatoInstruccion
+        + opcode : Opcode
+        + funct : Funct
+        + rs : int
+        + rt : int
+        + rd : int
+        + shamt : int
+        + inmediato : int
+        + inmediatoSinSigno : int
+        + direccion : int
+        --
+        + esNop() : boolean
+        + esHalt() : boolean
+        + codificarR(opcode, rs, rt, rd, shamt, funct) : int {static}
+        + codificarI(opcode, rs, rt, inmediato) : int {static}
+        + codificarJ(opcode, direccion) : int {static}
+        + codificarHalt() : int {static}
+    }
+
+    class Decodificador {
+        + decodificar(palabra : int) : Instruccion {static}
+        + opcode(palabra : int) : int {static}
+        + rs(palabra : int) : int {static}
+        + rt(palabra : int) : int {static}
+        + rd(palabra : int) : int {static}
+        + shamt(palabra : int) : int {static}
+        + funct(palabra : int) : int {static}
+        + inmediatoSinSigno(palabra : int) : int {static}
+        + extensionSigno16(inmediato : int) : int {static}
+        + direccionJ(palabra : int) : int {static}
+    }
+
+    enum Opcode {
+        R
+        J
+        JAL
+        BEQ
+        BNE
+        ADDI
+        ADDIU
+        SLTI
+        SLTIU
+        ANDI
+        ORI
+        XORI
+        LUI
+        LW
+        SW
+        HALT
+    }
+
+    enum Funct {
+        SLL
+        SRL
+        JR
+        SYSCALL
+        MFHI
+        MFLO
+        MULT
+        DIV
+        ADD
+        ADDU
+        SUB
+        SUBU
+        AND
+        OR
+        XOR
+        NOR
+        SLT
+        SLTU
+    }
+
+    enum FormatoInstruccion {
+        R
+        I
+        J
+    }
+
+    enum ServicioSyscall {
+        IMPRIMIR_ENTERO
+        IMPRIMIR_CADENA
+        LEER_ENTERO
+        IMPRIMIR_CARACTER
+        TERMINAR
+    }
+
+    class ProgramaBuilder {
+        + halt() : ProgramaBuilder
+        + syscall() : ProgramaBuilder
+        + etiqueta(nombre : String) : ProgramaBuilder
+        + generar() : Programa
+        ...
+    }
+
+    class "ProgramaBuilder.Programa" as Programa {
+        + codigo : int[]
+        + datos : int[]
+    }
+
+    class Desensamblador {
+        + mnemonico(palabra : int, pc : int) : String {static}
+        + operacion(palabra : int, pc : int, cpu : CPU) : String {static}
+    }
+
+    class Binario {
+        + a32(valor : int) : String {static}
+        + parsear(texto : String) : int[] {static}
+    }
+
+    Instruccion ..> FormatoInstruccion : usa
+    Instruccion ..> Opcode : usa
+    Instruccion ..> Funct : usa
+    Decodificador ..> Instruccion : crea
+    Decodificador ..> Opcode : usa
+    Decodificador ..> Funct : usa
+    ProgramaBuilder ..> Instruccion : codifica
+    ProgramaBuilder ..> Opcode : usa
+    ProgramaBuilder ..> Funct : usa
+    ProgramaBuilder ..> Programa : crea
+    Desensamblador ..> Decodificador : usa
+    Desensamblador ..> ServicioSyscall : usa
+
+    CPU ..> Decodificador : etapa ID
+    UnidadControl ..> Instruccion : decodifica
+    EjecutorInstrucciones ..> Instruccion : ejecuta
+}
+
+note bottom of CPU
+  La CPU nunca muere: siempre ejecuta algo.
+  Arranca en la direccion 0; si el programa
+  no tiene instrucciones sigue ejecutando NOPs
+  (las celdas estan en 0x00000000 y la palabra
+  0 es un NOP) y el PC es circular en el mapa.
+  Solo se detiene con HALT o syscall 10.
+  Ciclo de 5 etapas:
+  IF (busqueda) → ID (decodificacion + senales)
+  → EX (ejecutor/ALU) → MEM (lw/sw) → WB
+end note
+
+note bottom of MemoriaSistema
+  Mapa segmentado (palabras de 32 bits):
+    texto    0 .. 99   (ROM)    instrucciones
+    datos  100 .. 199  (RAM)    datos, inicia en 000
+    disco  200 .. 299  (disco)  almacenamiento
+  Segmento y direccion: cada unidad tiene
+  nombre + direccion base dentro del mapa.
+end note
+
+note bottom of Opcode
+  HALT (0x3F) es la instruccion de ALTO:
+  le indica a la CPU que el programa termino.
+end note
+
+legend right
+  |= Simbolo |= Significado |
+  | <b>--&#124;></b> | Herencia |
+  | <b>*--</b> | Composicion |
+  | <b>o--</b> | Agregacion |
+  | <b>..></b> | Dependencia / uso |
+end legend
+
+@enduml

@@ -1,4 +1,4 @@
-package almacenamiento;
+package memoria;
 
 /**
  * Banco de registros del procesador: 32 registros de 32 bits.

@@ -1,40 +1,46 @@
 package pruebas;
 
-import almacenamiento.ContadorPrograma;
-import almacenamiento.DiscoDuro;
-import almacenamiento.RAM;
-import almacenamiento.ROM;
-import almacenamiento.Registros;
-import almacenamiento.UnidadAlmacenamiento;
+import cpu.PC;
+import memoria.DiscoDuro;
+import memoria.RAM;
+import memoria.ROM;
+import memoria.Registros;
+import memoria.UnidadAlmacenamiento;
 import alu.ALU;
 import alu.OperacionALU;
-import mips.Instruccion;
-import mips.MemoriaSistema;
-import mips.ProgramaBuilder;
-import mips.ProgramaBuilder.Programa;
+import instruccion.Decodificador;
+import instruccion.FormatoInstruccion;
+import instruccion.Funct;
+import instruccion.Instruccion;
+import instruccion.Opcode;
+import instruccion.ProgramaBuilder;
+import instruccion.ProgramaBuilder.Programa;
+import memoria.MemoriaSistema;
 
-import static mips.ProgramaBuilder.T0;
-import static mips.ProgramaBuilder.T1;
-import static mips.ProgramaBuilder.V0;
-import static mips.ProgramaBuilder.ZERO;
+import static instruccion.ProgramaBuilder.T0;
+import static instruccion.ProgramaBuilder.T1;
+import static instruccion.ProgramaBuilder.V0;
+import static instruccion.ProgramaBuilder.ZERO;
 
 /**
- * Pruebas unitarias del simulador del procesador MIPS.
+ * Pruebas unitarias del emulador del procesador MIPS.
  * Ejecucion: java -cp out pruebas.PruebasUnitarias
  */
 public class PruebasUnitarias {
 
     public static void main(String[] args) {
-        System.out.println("=== PRUEBAS UNITARIAS - Simulador MIPS ===");
+        System.out.println("=== PRUEBAS UNITARIAS - Emulador MIPS ===");
         System.out.println();
 
         probarUnidadAlmacenamiento();
+        probarSegmentosDeMemoria();
         probarMemorias();
         probarDiscoDuro();
         probarRegistros();
         probarContadorPrograma();
         probarALU();
         probarCodificacionInstrucciones();
+        probarHalto();
         probarProgramaBuilder();
 
         int fallidas = MiniTest.resumen("RESUMEN PRUEBAS UNITARIAS");
@@ -43,9 +49,10 @@ public class PruebasUnitarias {
 
     private static void probarUnidadAlmacenamiento() {
         System.out.println("-- UnidadAlmacenamiento --");
-        UnidadAlmacenamiento u = new UnidadAlmacenamiento(32, 100);
+        UnidadAlmacenamiento u = new UnidadAlmacenamiento("prueba", 0, 32, 100);
         MiniTest.assertEquals("ancho de palabra = 32 bits", 32, u.getAnchoPalabra());
         MiniTest.assertEquals("cantidad de celdas = 100", 100, u.getCantidadCeldas());
+        MiniTest.assertEquals("nombre del segmento", "prueba", u.getNombre());
 
         u.escribir(0, 42);
         u.escribir(99, -1);
@@ -61,7 +68,35 @@ public class PruebasUnitarias {
         MiniTest.assertEquals("limpiar pone celda 0 a 0", 0, u.leer(0));
 
         MiniTest.assertThrows("constructor rechaza celdas <= 0",
-                () -> new UnidadAlmacenamiento(32, 0), IllegalArgumentException.class);
+                () -> new UnidadAlmacenamiento("prueba", 0, 32, 0), IllegalArgumentException.class);
+    }
+
+    private static void probarSegmentosDeMemoria() {
+        System.out.println("-- Segmentos de memoria --");
+        RAM ram = new RAM();
+        ROM rom = new ROM();
+        DiscoDuro disco = new DiscoDuro();
+
+        MiniTest.assertEquals("ROM = segmento de texto en la direccion 0", 0, rom.getDireccionBase());
+        MiniTest.assertEquals("RAM = segmento de datos en la direccion 100", 100, ram.getDireccionBase());
+        MiniTest.assertEquals("disco = segmento de almacenamiento en la direccion 200", 200,
+                disco.getDireccionBase());
+
+        MiniTest.assertTrue("la direccion 100 pertenece a la RAM", ram.contieneAbsoluta(100));
+        MiniTest.assertFalse("la direccion 100 no pertenece a la ROM", rom.contieneAbsoluta(100));
+        MiniTest.assertEquals("direccion absoluta -> local en RAM", 0, ram.aLocal(100));
+        MiniTest.assertEquals("direccion absoluta -> local en disco", 50, disco.aLocal(250));
+        MiniTest.assertThrows("direccion de otro segmento rechazada",
+                () -> ram.aLocal(250), IndexOutOfBoundsException.class);
+
+        MemoriaSistema mapa = new MemoriaSistema(rom, ram, disco);
+        MiniTest.assertEquals("el mapa tiene 300 celdas", 300, mapa.totalCeldas());
+        MiniTest.assertEquals("leer direccion global 105 en la RAM", 0, mapa.leer(105));
+        mapa.escribir(105, 777);
+        MiniTest.assertEquals("escribir/leer direccion global 105", 777, mapa.leer(105));
+        MiniTest.assertEquals("escribir en 105 llega a la celda local 5 de la RAM", 777, ram.leer(5));
+        MiniTest.assertThrows("direccion fuera del mapa (300)",
+                () -> mapa.leer(300), IndexOutOfBoundsException.class);
     }
 
     private static void probarMemorias() {
@@ -69,6 +104,8 @@ public class PruebasUnitarias {
         RAM ram = new RAM();
         MiniTest.assertEquals("RAM ancho 32 bits", 32, ram.getAnchoPalabra());
         MiniTest.assertEquals("RAM 100 celdas", 100, ram.getCantidadCeldas());
+        MiniTest.assertEquals("RAM arranca en 0x00000000 (celda 0)", 0, ram.leer(0));
+        MiniTest.assertEquals("RAM arranca en 0x00000000 (celda 99)", 0, ram.leer(99));
         ram.escribir(50, 12345);
         MiniTest.assertEquals("RAM escritura/lectura", 12345, ram.leer(50));
 
@@ -136,8 +173,8 @@ public class PruebasUnitarias {
     }
 
     private static void probarContadorPrograma() {
-        System.out.println("-- Contador de programa --");
-        ContadorPrograma pc = new ContadorPrograma();
+        System.out.println("-- Contador de programa (PC) --");
+        PC pc = new PC();
         MiniTest.assertEquals("PC inicia en 0", 0, pc.get());
         pc.incrementar();
         MiniTest.assertEquals("PC incrementa en 1 (siguiente instruccion)", 1, pc.get());
@@ -148,7 +185,7 @@ public class PruebasUnitarias {
         MiniTest.assertEquals("PC set manual", 50, pc.get());
         pc.reiniciar();
         MiniTest.assertEquals("PC reiniciar", 0, pc.get());
-        MiniTest.assertEquals("ancho del PC = 32 bits", 32, ContadorPrograma.ANCHO);
+        MiniTest.assertEquals("ancho del PC = 32 bits", 32, PC.ANCHO);
     }
 
     private static void probarALU() {
@@ -190,39 +227,69 @@ public class PruebasUnitarias {
     private static void probarCodificacionInstrucciones() {
         System.out.println("-- Codificacion de instrucciones --");
 
-        int add = Instruccion.codificarR(Instruccion.OP_R, 9, 10, 8, 0, Instruccion.FUNCT_ADD);
-        MiniTest.assertEquals("opcode de R-type", 0, Instruccion.opcode(add));
-        MiniTest.assertEquals("rs de add", 9, Instruccion.rs(add));
-        MiniTest.assertEquals("rt de add", 10, Instruccion.rt(add));
-        MiniTest.assertEquals("rd de add", 8, Instruccion.rd(add));
-        MiniTest.assertEquals("funct de add", Instruccion.FUNCT_ADD, Instruccion.funct(add));
-        MiniTest.assertTrue("es tipo R", Instruccion.esTipoR(add));
+        int add = Instruccion.codificarR(Opcode.R.codigo, 9, 10, 8, 0, Funct.ADD.codigo);
+        MiniTest.assertEquals("opcode de R-type", Opcode.R.codigo, Decodificador.opcode(add));
+        MiniTest.assertEquals("rs de add", 9, Decodificador.rs(add));
+        MiniTest.assertEquals("rt de add", 10, Decodificador.rt(add));
+        MiniTest.assertEquals("rd de add", 8, Decodificador.rd(add));
+        MiniTest.assertEquals("funct de add", Funct.ADD.codigo, Decodificador.funct(add));
+        MiniTest.assertEquals("decodificar: opcode ADD", "R",
+                Decodificador.decodificar(add).opcode.name());
+        MiniTest.assertEquals("decodificar: funct ADD", "ADD",
+                Decodificador.decodificar(add).funct.name());
+        MiniTest.assertEquals("decodificar: formato R", "R",
+                Decodificador.decodificar(add).formato.name());
 
-        int addu = Instruccion.codificarR(Instruccion.OP_R, 9, 10, 8, 0, Instruccion.FUNCT_ADDU);
-        MiniTest.assertEquals("funct de addu", Instruccion.FUNCT_ADDU, Instruccion.funct(addu));
-        int subu = Instruccion.codificarR(Instruccion.OP_R, 9, 10, 8, 0, Instruccion.FUNCT_SUBU);
-        MiniTest.assertEquals("funct de subu", Instruccion.FUNCT_SUBU, Instruccion.funct(subu));
-        int sltu = Instruccion.codificarR(Instruccion.OP_R, 9, 10, 8, 0, Instruccion.FUNCT_SLTU);
-        MiniTest.assertEquals("funct de sltu", Instruccion.FUNCT_SLTU, Instruccion.funct(sltu));
+        int addu = Instruccion.codificarR(Opcode.R.codigo, 9, 10, 8, 0, Funct.ADDU.codigo);
+        MiniTest.assertEquals("funct de addu", Funct.ADDU.codigo, Decodificador.funct(addu));
+        int subu = Instruccion.codificarR(Opcode.R.codigo, 9, 10, 8, 0, Funct.SUBU.codigo);
+        MiniTest.assertEquals("funct de subu", Funct.SUBU.codigo, Decodificador.funct(subu));
+        int sltu = Instruccion.codificarR(Opcode.R.codigo, 9, 10, 8, 0, Funct.SLTU.codigo);
+        MiniTest.assertEquals("funct de sltu", Funct.SLTU.codigo, Decodificador.funct(sltu));
 
-        int addi = Instruccion.codificarI(Instruccion.OP_ADDI, 0, 8, 100);
-        MiniTest.assertEquals("opcode de addi", Instruccion.OP_ADDI, Instruccion.opcode(addi));
-        MiniTest.assertEquals("inmediato de addi", 100, Instruccion.inmediatoSinSigno(addi));
+        int addi = Instruccion.codificarI(Opcode.ADDI.codigo, 0, 8, 100);
+        MiniTest.assertEquals("opcode de addi", Opcode.ADDI.codigo, Decodificador.opcode(addi));
+        MiniTest.assertEquals("inmediato de addi", 100, Decodificador.inmediatoSinSigno(addi));
+        MiniTest.assertEquals("decodificar: opcode ADDI", "ADDI",
+                Decodificador.decodificar(addi).opcode.name());
 
-        int addiu = Instruccion.codificarI(Instruccion.OP_ADDIU, 0, 8, -3);
-        MiniTest.assertEquals("opcode de addiu", Instruccion.OP_ADDIU, Instruccion.opcode(addiu));
-        MiniTest.assertEquals("extension de signo de -3", -3, Instruccion.extensionSigno16(
-                Instruccion.inmediatoSinSigno(addiu)));
+        int addiu = Instruccion.codificarI(Opcode.ADDIU.codigo, 0, 8, -3);
+        MiniTest.assertEquals("opcode de addiu", Opcode.ADDIU.codigo, Decodificador.opcode(addiu));
+        MiniTest.assertEquals("extension de signo de -3", -3, Decodificador.extensionSigno16(
+                Decodificador.inmediatoSinSigno(addiu)));
 
-        int sltiu = Instruccion.codificarI(Instruccion.OP_SLTIU, 9, 8, 5);
-        MiniTest.assertEquals("opcode de sltiu", Instruccion.OP_SLTIU, Instruccion.opcode(sltiu));
+        int sltiu = Instruccion.codificarI(Opcode.SLTIU.codigo, 9, 8, 5);
+        MiniTest.assertEquals("opcode de sltiu", Opcode.SLTIU.codigo, Decodificador.opcode(sltiu));
 
-        int j = Instruccion.codificarJ(Instruccion.OP_J, 50);
-        MiniTest.assertEquals("opcode de j", Instruccion.OP_J, Instruccion.opcode(j));
-        MiniTest.assertEquals("direccion de j", 50, Instruccion.direccionJ(j));
+        int j = Instruccion.codificarJ(Opcode.J.codigo, 50);
+        MiniTest.assertEquals("opcode de j", Opcode.J.codigo, Decodificador.opcode(j));
+        MiniTest.assertEquals("direccion de j", 50, Decodificador.direccionJ(j));
+        MiniTest.assertEquals("decodificar: direccion del salto J", 50,
+                Decodificador.decodificar(j).direccion);
 
-        int sys = Instruccion.codificarR(Instruccion.OP_R, 0, 0, 0, 0, Instruccion.FUNCT_SYSCALL);
-        MiniTest.assertEquals("funct de syscall", Instruccion.FUNCT_SYSCALL, Instruccion.funct(sys));
+        int sys = Instruccion.codificarR(Opcode.R.codigo, 0, 0, 0, 0, Funct.SYSCALL.codigo);
+        MiniTest.assertEquals("funct de syscall", Funct.SYSCALL.codigo, Decodificador.funct(sys));
+
+        MiniTest.assertEquals("la palabra 0 es NOP", Instruccion.PALABRA_NOP, 0);
+        MiniTest.assertTrue("decodificar palabra 0 -> nop", Decodificador.decodificar(0).esNop());
+    }
+
+    private static void probarHalto() {
+        System.out.println("-- Instruccion HALT --");
+
+        int halt = Instruccion.codificarHalt();
+        MiniTest.assertEquals("opcode de halt = 0x3F", 0x3F, Decodificador.opcode(halt));
+        Instruccion instr = Decodificador.decodificar(halt);
+        MiniTest.assertEquals("decodificar: opcode HALT", "HALT", instr.opcode.name());
+        MiniTest.assertTrue("esHalt() es true", instr.esHalt());
+        MiniTest.assertFalse("halt no es NOP", instr.esNop());
+
+        ProgramaBuilder p = new ProgramaBuilder();
+        p.addiu(T0, ZERO, 7);
+        p.halt();
+        Programa prog = p.generar();
+        MiniTest.assertEquals("halt ocupa una instruccion", 2, prog.codigo.length);
+        MiniTest.assertEquals("la ultima palabra es HALT", halt, prog.codigo[1]);
     }
 
     private static void probarProgramaBuilder() {
@@ -234,21 +301,21 @@ public class PruebasUnitarias {
         p.syscall();
         Programa prog = p.generar();
         MiniTest.assertEquals("3 instrucciones generadas", 3, prog.codigo.length);
-        MiniTest.assertEquals("cargarConstante(42) usa addiu", Instruccion.OP_ADDIU,
-                Instruccion.opcode(prog.codigo[0]));
-        MiniTest.assertEquals("inmediato 42", 42, Instruccion.extensionSigno16(
-                Instruccion.inmediatoSinSigno(prog.codigo[0])));
-        MiniTest.assertEquals("opcode de addu", 0, Instruccion.opcode(prog.codigo[1]));
-        MiniTest.assertEquals("funct de addu", Instruccion.FUNCT_ADDU, Instruccion.funct(prog.codigo[1]));
+        MiniTest.assertEquals("cargarConstante(42) usa addiu", Opcode.ADDIU.codigo,
+                Decodificador.opcode(prog.codigo[0]));
+        MiniTest.assertEquals("inmediato 42", 42, Decodificador.extensionSigno16(
+                Decodificador.inmediatoSinSigno(prog.codigo[0])));
+        MiniTest.assertEquals("opcode de addu", Opcode.R.codigo, Decodificador.opcode(prog.codigo[1]));
+        MiniTest.assertEquals("funct de addu", Funct.ADDU.codigo, Decodificador.funct(prog.codigo[1]));
 
         ProgramaBuilder p2 = new ProgramaBuilder();
         p2.cargarConstante(V0, 0x12345678);
         Programa prog2 = p2.generar();
         MiniTest.assertEquals("constante de 32 bits ocupa lui + ori", 2, prog2.codigo.length);
-        MiniTest.assertEquals("lui carga la parte alta", Instruccion.OP_LUI,
-                Instruccion.opcode(prog2.codigo[0]));
+        MiniTest.assertEquals("lui carga la parte alta", Opcode.LUI.codigo,
+                Decodificador.opcode(prog2.codigo[0]));
         MiniTest.assertEquals("ori carga la parte baja", 0x5678,
-                Instruccion.inmediatoSinSigno(prog2.codigo[1]));
+                Decodificador.inmediatoSinSigno(prog2.codigo[1]));
 
         ProgramaBuilder p3 = new ProgramaBuilder();
         int dir = p3.palabra(5);
@@ -257,15 +324,15 @@ public class PruebasUnitarias {
         int dirTexto = p3.cadena("Hola");
         p3.lwAbs(T0, dir);
         Programa prog3 = p3.generar();
-        MiniTest.assertEquals("los datos empiezan en la celda 100", MemoriaSistema.BASE_RAM, dir);
+        MiniTest.assertEquals("los datos empiezan en la celda 100", RAM.DIRECCION_BASE, dir);
         MiniTest.assertEquals("segunda palabra", 6, prog3.datos[1]);
         MiniTest.assertEquals("la cadena ocupa 5 celdas (4 + nulo)", 5,
                 prog3.datos.length - 3);
         MiniTest.assertEquals("direccion de la cadena", 103, dirTexto);
         MiniTest.assertEquals("lwAbs con direccion absoluta", dir,
-                Instruccion.inmediatoSinSigno(prog3.codigo[0]));
-        MiniTest.assertEquals("opcode de lw", Instruccion.OP_LW,
-                Instruccion.opcode(prog3.codigo[0]));
+                Decodificador.inmediatoSinSigno(prog3.codigo[0]));
+        MiniTest.assertEquals("opcode de lw", Opcode.LW.codigo,
+                Decodificador.opcode(prog3.codigo[0]));
 
         ProgramaBuilder p4 = new ProgramaBuilder();
         p4.addiu(T0, ZERO, 1);
@@ -275,9 +342,9 @@ public class PruebasUnitarias {
         p4.syscall();
         Programa prog4 = p4.generar();
         MiniTest.assertEquals("offset de bne hacia adelante", 1,
-                Instruccion.extensionSigno16(Instruccion.inmediatoSinSigno(prog4.codigo[1])));
-        MiniTest.assertEquals("opcode de bne", Instruccion.OP_BNE,
-                Instruccion.opcode(prog4.codigo[1]));
+                Decodificador.extensionSigno16(Decodificador.inmediatoSinSigno(prog4.codigo[1])));
+        MiniTest.assertEquals("opcode de bne", Opcode.BNE.codigo,
+                Decodificador.opcode(prog4.codigo[1]));
 
         ProgramaBuilder p5 = new ProgramaBuilder();
         p5.j("destino");
@@ -286,7 +353,7 @@ public class PruebasUnitarias {
         p5.syscall();
         Programa prog5 = p5.generar();
         MiniTest.assertEquals("direccion de j resuelta", 2,
-                Instruccion.direccionJ(prog5.codigo[0]));
+                Decodificador.direccionJ(prog5.codigo[0]));
 
         ProgramaBuilder p6 = new ProgramaBuilder();
         p6.beq(ZERO, ZERO, "noexiste");

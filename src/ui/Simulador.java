@@ -1,5 +1,8 @@
-package mips;
+package ui;
 
+import cpu.CPU;
+import instruccion.ProgramaBuilder;
+import memoria.RAM;
 import programas.Factorial;
 import programas.Integral;
 import programas.Perceptron;
@@ -14,10 +17,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 /**
- * Simulador basico del procesador MIPS - Practica 2.
+ * Emulador basico del procesador MIPS - Practica 2.
  *
  * Uso:
- *   java -cp out mips.Simulador <programa> [--traza] [--estado] [--captura archivo]
+ *   java -cp out ui.Simulador <programa> [--traza] [--estado] [--captura archivo]
  */
 public class Simulador {
 
@@ -87,18 +90,19 @@ public class Simulador {
         }
 
         try {
-            ProcesadorMIPS cpu = new ProcesadorMIPS();
+            CPU cpu = new CPU();
             cpu.cargarPrograma(prog.codigo);
             for (int i = 0; i < prog.datos.length; i++) {
-                cpu.getMemoria().escribir(MemoriaSistema.BASE_RAM + i, prog.datos[i]);
+                cpu.getMemoria().escribir(RAM.DIRECCION_BASE + i, prog.datos[i]);
             }
 
             System.out.println("================================================================");
-            System.out.println(" INICIO DE EJECUCION - Simulador de procesador MIPS");
+            System.out.println(" INICIO DE EJECUCION - Emulador de procesador MIPS");
             System.out.println(" Programa: " + nombre);
             System.out.println(" Instrucciones cargadas: " + prog.codigo.length
                     + " | Datos cargados: " + prog.datos.length + " celdas");
             System.out.println("----------------------------------------------------------------");
+            System.out.print(cpu.getMemoria().mapa());
             System.out.println("ESTADO INICIAL:");
             System.out.print(cpu.getRegistros().volcar());
             System.out.println(cpu.getPc().toString());
@@ -106,27 +110,29 @@ public class Simulador {
             System.out.println(" SALIDA DEL PROGRAMA:");
             System.out.println("----------------------------------------------------------------");
 
-            int limite = cpu.longitudPrograma();
-            while (!cpu.isDetenido()) {
-                int pcActual = cpu.getPc().get();
-                if (pcActual < 0 || pcActual >= cpu.getRom().getCantidadCeldas()) {
-                    System.out.println("[fin: PC fuera de la ROM]");
-                    break;
-                }
-                int instr = cpu.getRom().leer(pcActual);
-                if (instr == 0 && pcActual >= limite) {
-                    System.out.println("[fin: se alcanzo el final del programa]");
-                    break;
-                }
+            long ejecutados = 0;
+            while (!cpu.isDetenido()
+                    && ejecutados < CPU.LIMITE_CICLOS_SEGURIDAD) {
                 if (traza) {
+                    int pcActual = cpu.getPc().get();
+                    if (pcActual < 0 || pcActual >= cpu.getMemoria().totalCeldas()) {
+                        pcActual = 0; // el PC es circular: la CPU nunca muere
+                    }
                     System.out.println(String.format("  [%4d] PC=%3d  0x%08X",
-                            cpu.getCiclos(), pcActual, instr));
+                            cpu.getCiclos(), pcActual, cpu.getMemoria().leer(pcActual)));
                 }
                 cpu.ciclo();
+                ejecutados++;
             }
 
             System.out.println("----------------------------------------------------------------");
-            System.out.println("FIN DE EJECUCION - ciclos: " + cpu.getCiclos());
+            if (cpu.isDetenido()) {
+                System.out.println("FIN DE EJECUCION - la CPU se detuvo con HALT/exit - ciclos: "
+                        + cpu.getCiclos());
+            } else {
+                System.out.println("FIN DE EJECUCION - limite de seguridad de "
+                        + CPU.LIMITE_CICLOS_SEGURIDAD + " ciclos (el programa no tiene HALT)");
+            }
             if (estado) {
                 System.out.println("ESTADO FINAL:");
                 System.out.print(cpu.getRegistros().volcar());
@@ -170,7 +176,7 @@ public class Simulador {
     }
 
     private static void imprimirUso() {
-        System.out.println("Uso: java -cp out mips.Simulador [programa] [--traza] [--estado] [--captura <archivo>]");
+        System.out.println("Uso: java -cp out ui.Simulador [programa] [--traza] [--estado] [--captura <archivo>]");
         System.out.println("  (sin argumentos o con --gui se abre la ventana grafica)");
         System.out.println("  programas : sumatoria factorial integral promedio perceptron");
         System.out.println("  --traza   : imprime cada ciclo (PC y codigo de la instruccion)");

@@ -14,5 +14,6 @@ public enum OperacionALU {
     SLTU,
     SLL,
     SRL,
+    LUI,
     NOP
 }

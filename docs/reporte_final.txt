@@ -1,0 +1,80 @@
+Paso 5. Generar el reporte.
+Generar un reporte con el siguiente contenido.
+Descargar la plantilla UV [Descargar] para generar la práctica.
+Portada
+Nombres, matrículas, título, fecha de entrega del documento
+Introducción.
+Razones por las cuales desarrollar un procesador propio desde cero.
+Que ganancia tiene un alumno cuando sabe implementar un simulador de un procesador real.
+Explique la razón de implementar un emulador para el procesador MIPS.
+Evidencia de ejecución del código.
+Generar una tabla con la siguiente forma:
+Columnas: Línea de código a ejecutar, resultado del emulador.
+Filas: Líneas de código y su resultado.
+Uso de inteligencias artificiales para la generación de código
+Incluir los PROMPTs
+Reflexiones finales
+Sobre el nivel de programación que se requiere para implementar este tipo de emuladores.
+Sobre el trabajo en equipo en el diseño e implementación de un procesador.
+Explique a los estudiantes que cursarán esta experiencia educativa el próximo año porque les conviene tener el conocimiento que se ve en este curso.
+El documento debe entregarse en formato PDF de manera exclusiva.
+El único medio para entregar el documento es Eminus. Se rechazará la entrega por otros medios.
+
+
+Rúbrica de evaluación.
+Rubro
+No cumple
+Cumple parcialmente
+Cumple completamente
+Formato
+No aplica, No corresponde, No entregó, Sin la calidad requerida, No cumple con ningún requisito solicitado.
+Cumple con algunos de la siguiente información:
+Nombres, matrículas, título, fecha de entrega del documento.
+Plantilla UV
+Cumple con toda la información solicitada:
+Nombres, matrículas, título, fecha de entrega del documento.
+Plantilla UV
+Introducción
+No aplica, No corresponde, No entregó, Sin la calidad requerida
+Cumple con algunos de la siguiente información:
+Razones por las cuales desarrollar un procesador propio desde cero.
+Que ganancia tiene un alumno cuando sabe implementar un simulador de un procesador real.
+Explique la razón de implementar un emulador para el procesador MIPS.
+Cumple con toda la información solicitada:
+Razones por las cuales desarrollar un procesador propio desde cero.
+Que ganancia tiene un alumno cuando sabe implementar un simulador de un procesador real.
+Explique la razón de implementar un emulador para el procesador MIPS.
+Evidencias de realización
+No aplica, No corresponde, No entregó, Sin la calidad requerida
+Cumple con algunos de la siguiente información:
+Tabla: Línea de código a ejecutar, resultado del emulador.
+Cumple con toda la información solicitada:
+Tabla: Línea de código a ejecutar, resultado del emulador.
+Reflexiones finales
+No aplica, No corresponde, No entregó, Sin la calidad requerida
+Cumple con algunos de la siguiente información:
+Sobre el nivel de programación que se requiere para implementar este tipo de emuladores.
+Sobre el trabajo en equipo en el diseño e implementación de un procesador.
+Explique a los estudiantes que cursarán esta experiencia educativa el próximo año porque les conviene tener el conocimiento que se ve en este curso.
+Cumple con toda la información solicitada:
+Sobre el nivel de programación que se requiere para implementar este tipo de emuladores.
+Sobre el trabajo en equipo en el diseño e implementación de un procesador.
+Explique a los estudiantes que cursarán esta experiencia educativa el próximo año porque les conviene tener el conocimiento que se ve en este curso.
+Axiológico
+No aplica, no entregó, no tiene la calidad requerida
+Cumple con la mayoría:
+Libertad. Responsabilidad. Solidaridad. Respeto. Honestidad.
+Integridad.
+Cumple con la totalidad:
+Libertad. Responsabilidad. Solidaridad. Respeto. Honestidad.
+Integridad.
+Heurístico
+No aplica, no entregó, no tiene la calidad requerida
+Cumple con la mayoría:
+Instrucciones de esta práctica
+Cumple con la totalidad:
+Instrucciones de esta práctica
+Uso de IA
+No aplica, no entregó, no tiene la calidad requerida
+El documento tiene uso de IA pero el equipo no lo declara plenamente
+El equipo reconoce y describe plenamente el uso de IA en la elaboración del documento

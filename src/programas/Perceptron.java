@@ -1,19 +1,19 @@
 package programas;
 
-import mips.ProgramaBuilder;
+import instruccion.ProgramaBuilder;
 
-import static mips.ProgramaBuilder.S0;
-import static mips.ProgramaBuilder.S1;
-import static mips.ProgramaBuilder.T0;
-import static mips.ProgramaBuilder.T1;
-import static mips.ProgramaBuilder.T2;
-import static mips.ProgramaBuilder.T3;
-import static mips.ProgramaBuilder.T4;
-import static mips.ProgramaBuilder.T5;
-import static mips.ProgramaBuilder.T7;
-import static mips.ProgramaBuilder.T8;
-import static mips.ProgramaBuilder.T9;
-import static mips.ProgramaBuilder.ZERO;
+import static instruccion.ProgramaBuilder.S0;
+import static instruccion.ProgramaBuilder.S1;
+import static instruccion.ProgramaBuilder.T0;
+import static instruccion.ProgramaBuilder.T1;
+import static instruccion.ProgramaBuilder.T2;
+import static instruccion.ProgramaBuilder.T3;
+import static instruccion.ProgramaBuilder.T4;
+import static instruccion.ProgramaBuilder.T5;
+import static instruccion.ProgramaBuilder.T7;
+import static instruccion.ProgramaBuilder.T8;
+import static instruccion.ProgramaBuilder.T9;
+import static instruccion.ProgramaBuilder.ZERO;
 
 /**
  * Perceptron de 3 entradas con pesos y bias fijos:
