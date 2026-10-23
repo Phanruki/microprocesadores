@@ -70,6 +70,7 @@ public class VentanaEmulador extends JFrame {
     public VentanaEmulador() {
         super("Emulador MIPS - Practica 2");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        getContentPane().setBackground(TemaOscuro.BASE);
         setLayout(new BorderLayout(6, 6));
         add(construirEntrada(), BorderLayout.NORTH);
         add(construirPanelCentral(), BorderLayout.CENTER);
@@ -90,29 +91,28 @@ public class VentanaEmulador extends JFrame {
 
     private JPanel construirEntrada() {
         JPanel panel = new JPanel(new BorderLayout(6, 6));
-        panel.setBorder(new CompoundBorder(
-                new EmptyBorder(6, 6, 0, 6),
-                BorderFactory.createTitledBorder("Instrucciones (Binario)")));
+        panel.setBackground(TemaOscuro.PANEL);
+        panel.setBorder(TemaOscuro.panelBorde("Instrucciones (Binario)"));
 
-        entrada.setFont(fuente());
+        TemaOscuro.estiloArea(entrada, true);
         entrada.setLineWrap(true);
         entrada.setWrapStyleWord(false);
-        JScrollPane scroll = new JScrollPane(entrada);
-        panel.add(scroll, BorderLayout.CENTER);
+        panel.add(TemaOscuro.scroll(entrada), BorderLayout.CENTER);
 
         JPanel botones = new JPanel();
+        botones.setOpaque(false);
         botones.setLayout(new BoxLayout(botones, BoxLayout.Y_AXIS));
-        botones.add(boton("Ejecutar 1 ciclo", e -> ejecutarCiclos(1)));
+        botones.add(boton("Ejecutar 1 ciclo", e -> ejecutarCiclos(1), TemaOscuro.VERDE));
         botones.add(Box.createVerticalStrut(4));
-        botones.add(boton("Ejecutar programa", e -> ejecutarCiclos(LIMITE_CICLOS)));
+        botones.add(boton("Ejecutar programa", e -> ejecutarCiclos(LIMITE_CICLOS), TemaOscuro.VERDE_HOV));
         botones.add(Box.createVerticalStrut(4));
-        botones.add(boton("Cargar en el PC", e -> cargarInstrucciones()));
+        botones.add(boton("Cargar en el PC", e -> cargarInstrucciones(), null));
         botones.add(Box.createVerticalStrut(4));
-        botones.add(boton("Cargar ejemplo", e -> cargarEjemplo()));
+        botones.add(boton("Cargar ejemplo", e -> cargarEjemplo(), null));
         botones.add(Box.createVerticalStrut(4));
-        botones.add(boton("Reiniciar CPU", e -> reiniciarCpu()));
+        botones.add(boton("Reiniciar CPU", e -> reiniciarCpu(), null));
         botones.add(Box.createVerticalStrut(4));
-        botones.add(boton("Limpiar historial", e -> historial.setText("")));
+        botones.add(boton("Limpiar historial", e -> historial.setText(""), null));
         panel.add(botones, BorderLayout.EAST);
         return panel;
     }
@@ -134,14 +134,33 @@ public class VentanaEmulador extends JFrame {
         raiz.setResizeWeight(0.62);
         raiz.setContinuousLayout(true);
         raiz.setBorder(null);
+        oscurecerDivisor(superior);
+        oscurecerDivisor(inferior);
+        oscurecerDivisor(raiz);
         return raiz;
+    }
+
+    /** Deja un divisor de JSplitPane con el mismo tono oscuro que el tema. */
+    private void oscurecerDivisor(JSplitPane split) {
+        split.setBackground(TemaOscuro.BASE);
+        split.setDividerSize(6);
+        SwingUtilities.invokeLater(() -> {
+            for (java.awt.Component comp : split.getComponents()) {
+                if (comp instanceof javax.swing.JSplitPane) {
+                    continue;
+                }
+                comp.setBackground(TemaOscuro.BORDE);
+            }
+        });
     }
 
     private JPanel construirCpu() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createTitledBorder("Estado CPU"));
+        panel.setBackground(TemaOscuro.PANEL);
+        panel.setBorder(TemaOscuro.panelBorde("Estado CPU"));
 
         JPanel rejilla = new JPanel(new GridBagLayout());
+        rejilla.setOpaque(false);
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.WEST;
         c.insets = new Insets(4, 10, 4, 10);
@@ -152,11 +171,13 @@ public class VentanaEmulador extends JFrame {
             c.gridx = 0;
             c.gridy = i;
             JLabel etiqueta = new JLabel(etiquetas[i]);
-            etiqueta.setFont(fuente().deriveFont(Font.BOLD));
+            etiqueta.setFont(TemaOscuro.fuente(13f, Font.BOLD));
+            etiqueta.setForeground(TemaOscuro.TEXTO_DIM);
             rejilla.add(etiqueta, c);
 
             c.gridx = 1;
-            valores[i].setFont(fuente());
+            valores[i].setFont(TemaOscuro.fuente());
+            valores[i].setForeground(TemaOscuro.TEXTO);
             rejilla.add(valores[i], c);
         }
         panel.add(rejilla, BorderLayout.NORTH);
@@ -165,31 +186,28 @@ public class VentanaEmulador extends JFrame {
 
     private JPanel construirBarraEstado() {
         JPanel panel = new JPanel(new BorderLayout(8, 0));
+        panel.setBackground(TemaOscuro.PANEL);
         panel.setBorder(new CompoundBorder(
-                BorderFactory.createEtchedBorder(),
-                new EmptyBorder(4, 8, 4, 8)));
-        barraEstado.setFont(fuente());
-        barraEstado.setForeground(new Color(0x1B5E20));
-        barraCiclos.setFont(fuente());
+                BorderFactory.createMatteBorder(1, 0, 0, 0, TemaOscuro.BORDE),
+                new EmptyBorder(5, 10, 5, 10)));
+        barraEstado.setFont(TemaOscuro.fuente());
+        barraEstado.setForeground(TemaOscuro.OK);
+        barraCiclos.setFont(TemaOscuro.fuente());
+        barraCiclos.setForeground(TemaOscuro.TEXTO_DIM);
         panel.add(barraEstado, BorderLayout.CENTER);
         panel.add(barraCiclos, BorderLayout.EAST);
         return panel;
     }
 
     private JScrollPane conTitulo(JTextArea area, String titulo) {
-        area.setEditable(false);
-        area.setFont(fuente());
-        JScrollPane scroll = new JScrollPane(area);
-        scroll.setBorder(BorderFactory.createTitledBorder(titulo));
+        TemaOscuro.estiloArea(area, false);
+        JScrollPane scroll = TemaOscuro.scroll(area);
+        scroll.setBorder(TemaOscuro.titulo(titulo));
         return scroll;
     }
 
-    private JButton boton(String texto, java.awt.event.ActionListener accion) {
-        JButton boton = new JButton(texto);
-        boton.setAlignmentX(Component.LEFT_ALIGNMENT);
-        boton.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
-        boton.addActionListener(accion);
-        return boton;
+    private JButton boton(String texto, java.awt.event.ActionListener accion, Color acento) {
+        return TemaOscuro.boton(texto, accion, acento);
     }
 
     private void instalarAtajos() {
@@ -208,10 +226,6 @@ public class VentanaEmulador extends JFrame {
                 accion.actionPerformed(e);
             }
         });
-    }
-
-    private static Font fuente() {
-        return new Font(Font.MONOSPACED, Font.PLAIN, 13);
     }
 
     // ------------------------------------------------------------------
@@ -403,7 +417,9 @@ public class VentanaEmulador extends JFrame {
 
     public static void main(String[] args) {
         try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            // Look and feel cruzado (Metal): respeta los colores oscuros que
+            // aplicamos a mano y se ve igual en todos los sistemas.
+            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
         } catch (Exception ignored) {
             // se conserva el look and feel por defecto
         }
