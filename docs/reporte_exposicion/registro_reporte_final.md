@@ -416,24 +416,25 @@ Decisiones que conviene mencionar en el reporte:
 - [x] **Reporte final redactado**: `docs/reporte_exposicion/reporte_final/reporte_final.tex`
       (copia modificada de la plantilla UV `Reporte_LaTeX/main.tex`; secciones:
       introducción, desarrollo, evidencia con 2 tablas y **12 figuras**, uso de
-      IA con los 13 prompts y sus **34 capturas insertadas**, reflexiones y
-      referencias).
-- [x] **Reporte compilado**: `reporte_final.pdf` (61 páginas, tamaño carta,
+      IA con los 13 prompts y sus **34 capturas insertadas**, **reflexiones
+      finales una por integrante** y referencias).
+- [x] **Reporte compilado**: `reporte_final.pdf` (60 páginas, tamaño carta,
       compilado con XeLaTeX vía Tectonic; el `.docx` anterior se eliminó por no
       seguir el formato de la plantilla).
+- [x] **Portada y carátula trasera unidas**: `reporte_final_completo.pdf`
+      (62 páginas) = `portada.pdf` (pág. 1) + `reporte_final.pdf` (pág. 2–61) +
+      `anteportada.pdf` (pág. 62, carátula trasera con el lema UV). Este es el
+      **archivo final para subir a Eminus**.
 - [x] **Capturas de pantalla (imágenes)**: `generar_capturas.py` convierte las
       salidas reales en 12 PNG de terminal dentro de `reporte_final/imagenes/`;
       las 34 capturas de los prompts están en `reporte_final/imagenes/ia/`.
 
-## 8. Pendientes que quedan en el documento (los hace el equipo)
+## 8. Pendientes antes de subir a Eminus
 
-- [ ] **Insertar portada y anteportada** de la plantilla UV al inicio del PDF
-      (el equipo las tiene en PDF; el `.tex` deja el documento listo para
-      agregarlas: el índice inicia en página romana 2).
-- [ ] Poner la **fecha de entrega** real en la portada.
-- [ ] Revisar el PDF página por página (estilos, numeración de figuras y
-      tablas).
-- [ ] Subir el PDF **únicamente por Eminus**.
+- [ ] Revisar el PDF **completo** página por página (portada, índice,
+      numeración de figuras y tablas, carátula trasera).
+- [ ] Subir **únicamente** `reporte_final/reporte_final_completo.pdf` por
+      Eminus.
 
 ## 9. Cómo regenerar los artefactos
 
@@ -443,7 +444,17 @@ python3 docs/reporte_exposicion/reporte_final/generar_capturas.py      # 12 PNG
 cd docs/reporte_exposicion/reporte_final
 xelatex reporte_final.tex && xelatex reporte_final.tex   # índice completo
 # o bien: tectonic reporte_final.tex   (compila dos pasadas solo)
+
+# Unir portada + reporte + carátula trasera -> entregable final
+cd ../..   # de nuevo en docs/reporte_exposicion
+pdfunite portada.pdf reporte_final/reporte_final.pdf anteportada.pdf \
+         reporte_final/reporte_final_completo.pdf
 ```
+
+> **Orden del PDF final**: `portada.pdf` (pág. 1) + `reporte_final.pdf`
+> (pág. 2–61) + `anteportada.pdf` (pág. 62, carátula trasera con el lema UV).
+> En Windows/macOS sin `pdfunite`: unir con cualquier herramienta (p. ej.
+> `pdftk`, o en línea) respetando ese orden.
 
 > Las figuras de evidencia **no son inventadas**: `generar_capturas.py` toma el
 > texto literal de `salidas/*_captura.txt` y de la salida de

@@ -716,76 +716,61 @@ puede comprobar la respuesta con pruebas automatizadas.
 % =============================================================
 \section{Reflexiones finales}
 
-\subsection{Nivel de programación que se requiere}
+Cada integrante del equipo comparte, a continuación, su reflexión personal
+sobre la experiencia de haber construido el emulador desde cero.
 
-Implementar este tipo de emuladores no exige ser un programador experto, pero sí
-un nivel intermedio sólido y, sobre todo, orden. Se necesita dominar
-programación orientada a objetos en Java (clases, paquetes y encapsulamiento;
-incluso algo de herencia, como \texttt{DiscoDuro} que se deriva de
-\texttt{UnidadAlmacenamiento}), manejar arreglos y operaciones a nivel de bits,
-y estar cómodo con números binarios y hexadecimales.
+\subsection{Yadid Asiel Soto Hernández}
 
-El verdadero reto no es escribir la primera versión del código, sino depurar:
-cuando la salida no coincide con la esperada hay que rastrear el estado del PC,
-los registros y la memoria ciclo por ciclo. También se requiere capacidad de
-leer una especificación técnica (el manual de MIPS) y traducirla a código, más
-el hábito de escribir pruebas antes de dar por bueno un módulo. En síntesis, el
-nivel de programación es el de un estudiante avanzado, pero lo que hace que el
-proyecto funcione es la constancia y la disciplina de la verificación.
+Mi parte del proyecto fueron las unidades de almacenamiento, la ALU y los
+programas de sumatoria y promedio. Al inicio pensé que programar un procesador
+era cosa de expertos, pero me di cuenta de que no se requiere ser un programador
+de nivel industrial: basta con un nivel intermedio sólido en Java ---clases,
+paquetes, encapsulamiento y algo de herencia, como \texttt{DiscoDuro} que se
+deriva de \texttt{UnidadAlmacenamiento}---, manejo de arreglos y comodidad con
+números binarios y hexadecimales. Lo difícil no es escribir la primera versión
+del código, sino depurar: cuando la salida no coincide con la esperada hay que
+rastrear el PC, los registros y la memoria ciclo por ciclo. Ese proceso me
+enseñó a razonar con estado, algo que se aplica directo a sistemas embebidos y
+a la verificación de hardware. También aprendí a usar la inteligencia artificial
+con criterio: la IA me ayudó a plantear el análisis inicial y los programas,
+pero sólo funcionó cuando supe qué pedir y pude comprobar la respuesta con las
+pruebas del emulador.
 
-\subsection{El trabajo en equipo en el diseño e implementación de un procesador}
+\subsection{Jose de Jesus Berman Islas}
 
-Un procesador, aun tratándose de un emulador básico, es una tarea demasiado
-grande para una sola persona, y esta práctica lo confirmó. Repartimos el trabajo
-por módulos: \textbf{Yadid} trabajó las unidades de almacenamiento y la ALU,
-además de los programas de sumatoria y promedio; \textbf{José de Jesús} armó el
-sistema de pruebas (unitarias, de integración y de sistema), la documentación
-técnica y el DiscoDuro; \textbf{Miguel} implementó los programas de factorial,
-integral y perceptrón y la ventana gráfica.
+De mí dependió el sistema de pruebas (unitarias, de integración y de sistema),
+la documentación técnica y el \texttt{DiscoDuro}. Esta parte me hizo ver que la
+\textbf{verificación} es tan importante como la construcción: escribir las 117
+pruebas unitarias, las 44 de integración y las 40 de sistema fue lo que nos
+permitió detectar errores que, de otro modo, habrían pasado desapercibidos
+hasta la entrega. Aprendí a leer la especificación de MIPS y a traducirla a
+casos de prueba concretos, y a reportar \textbf{sin maquillar} exactamente lo
+que las pruebas arrojaron, incluidos los fallos que encontramos por el camino.
+En el trabajo en equipo, lo que más valoro no fue el reparto de tareas, sino la
+integración: acordamos convenciones comunes desde el inicio y corríamos las tres
+suites antes de dar por terminada cualquier función. Para mí, los valores que
+más quedaron en evidencia fueron la \textbf{honestidad} al presentar los
+resultados tal cual y la \textbf{responsabilidad} de entregar mi parte a tiempo
+y por el medio establecido.
 
-Lo más importante no fue el reparto, sino la \textbf{integración}: acordamos
-desde el inicio convenciones comunes (nombres de paquetes, ancho de palabra,
-mapa de direcciones y firmas de las clases), nos revisamos el código mutuamente
-y corríamos las tres suites de pruebas antes de dar por concluida cualquier
-tarea. Comparar nuestro diagrama de clases con el de un compañero fue
-especialmente útil: nos obligó a explicitar las decisiones de diseño y a
-unificar el esqueleto de cinco paquetes antes de escribir el código. Así como
-en la industria existen equipos separados de diseño, verificación y firmware,
-nosotros separamos la construcción del emulador de su verificación, y eso nos
-permitió encontrar errores que un solo programador probablemente no habría
-visto.
+\subsection{Miguel Alejandro Damian Bumas}
 
-\subsection{Por qué les conviene a quienes cursarán esta experiencia el próximo año}
-
-A los estudiantes que tomen este curso el próximo año les conviene este
-conocimiento por tres razones prácticas. La primera es que \textbf{conecta todas
-las capas de la computación}: quien entiende el ciclo de un procesador entiende
-qué hace realmente un compilador, por qué una instrucción cuesta lo que cuesta y
-cómo se comporta la memoria; deja de programar a ciegas. La segunda es que
-\textbf{mejora como programador}: depurar a nivel de registros enseña a razonar
-con estado y con tiempos, habilidad aplicable a sistemas embebidos, IoT,
-sistemas operativos y verificación de hardware, áreas con demanda laboral
-constante. La tercera es que \textbf{aprenden a usar la inteligencia artificial
-con criterio}: en esta práctica la IA nos ahorró muchas horas, pero sólo
-funcionó porque sabíamos qué pedir y podíamos comprobar la respuesta con
-pruebas; sin esos dos componentes, la herramienta devuelve código que parece
-correcto y no lo es. A esto se suma la experiencia de trabajar en equipo y
-entregar un reporte formal, situaciones que se parecen cada vez más a lo que será
-su vida profesional.
-
-\subsection{Valores en juego}
-
-La práctica puso en acción los valores de la universidad: \textbf{libertad} para
-elegir cómo estructurar cada módulo y qué decisiones de diseño tomar;
-\textbf{responsabilidad} por la parte que a cada quien le tocó y por entregar el
-trabajo en la fecha y por el medio establecidos; \textbf{solidaridad} al
-apoyarnos cuando un compañero se atascaba y al compartir lo que entendíamos;
-\textbf{respeto} por las ideas y el estilo de los demás, sin imponer la propia
-solución; \textbf{honestidad} al reportar exactamente lo que las pruebas
-arrojaron, incluidos los errores que encontramos, sin maquillar resultados; e
-\textbf{integridad} al cumplir con lo que nos comprometimos, presentando nuestro
-propio trabajo y utilizando la inteligencia artificial únicamente como
-herramienta de apoyo, dejando constancia de su uso en este reporte.
+Mi aportación fueron los programas de factorial, integral y perceptrón y la
+ventana gráfica del emulador. Esta práctica me confirmó que implementar un
+procesador conecta todas las capas de la computación: quien entiende el ciclo
+de instrucción comprende qué hace realmente un compilador y cómo se comporta la
+memoria, y deja de programar a ciegas. Traducir la especificación de MIPS a
+ensamblador y verlo correr fue lo que más me gustó, y construir la ventana
+(Swing) me permitió observar la CPU ciclo a ciclo, con sus registros y señales
+de control. Como recomendación para quienes tomen el curso el próximo año, diría
+que vale la pena por dos razones: mejora como programador, porque depurar a
+nivel de registros enseña a razonar con estado y con tiempos, y enseña a usar
+la IA donde corresponde ---como herramienta de apoyo que ahorra horas, siempre
+que se sepa qué pedir y se pueda verificar lo que devuelve---. En lo personal,
+me llevo la experiencia de haber trabajado en un equipo que se apoyó
+mutuamente, con \textbf{solidaridad} cuando alguno se atascaba y con
+\textbf{respeto} por las ideas de los demás, entregando un trabajo del que los
+tres nos hacemos responsables.
 
 % =============================================================
 %                       5. REFERENCIAS
