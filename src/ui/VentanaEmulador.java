@@ -37,6 +37,10 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Ventana grafica del emulador del procesador MIPS (Practica 2).
@@ -416,6 +420,7 @@ public class VentanaEmulador extends JFrame {
     // ------------------------------------------------------------------
 
     public static void main(String[] args) {
+        aplicarEscalaHiDPI(); // ANTES de cualquier uso de AWT
         try {
             // Look and feel cruzado (Metal): respeta los colores oscuros que
             // aplicamos a mano y se ve igual en todos los sistemas.
@@ -425,7 +430,78 @@ public class VentanaEmulador extends JFrame {
         }
         SwingUtilities.invokeLater(() -> {
             VentanaEmulador ventana = new VentanaEmulador();
+            ventana.ajustarTamanoAPantalla();
             ventana.setVisible(true);
         });
+    }
+
+    /**
+     * En pantallas HiDPI (p. ej. 3072x1728 con escala 2x en GNOME/Wayland) Swing
+     * dibuja a tamano fisico y la ventana sale diminuta. Consultamos la escala
+     * real al compositor (sin inicializar AWT) y fijamos sun.java2d.uiScale para
+     * que Java renderice a tamano logico. Si algo falla, no se toca nada.
+     */
+    private static void aplicarEscalaHiDPI() {
+        if (System.getProperty("sun.java2d.uiScale") != null) {
+            return; // el usuario ya forzo una escala explicita
+        }
+        double escala = detectarEscalaCompositor();
+        if (escala > 1.0) {
+            String valor = (escala == Math.rint(escala))
+                    ? String.valueOf((int) escala)
+                    : String.valueOf(escala);
+            System.setProperty("sun.java2d.uiScale", valor);
+        }
+    }
+
+    /**
+     * Detecta la escala HiDPI del compositor sin tocar AWT. Usa el DisplayConfig
+     * de Mutter (GNOME): de cada modo ACTUAL (marcado "true") compara la
+     * resolucion fisica contra su tamano logico. Devuelve 1.0 si no hay datos.
+     */
+    private static double detectarEscalaCompositor() {
+        String cmd = "gdbus call --session --dest org.gnome.Mutter.DisplayConfig "
+                + "--object-path /org/gnome/Mutter/DisplayConfig "
+                + "--method org.gnome.Mutter.DisplayConfig.GetCurrentState";
+        String salida;
+        try {
+            Process p = new ProcessBuilder("bash", "-lc", cmd)
+                    .redirectErrorStream(true).start();
+            BufferedReader r = new BufferedReader(
+                    new InputStreamReader(p.getInputStream()));
+            StringBuilder sb = new StringBuilder();
+            String linea;
+            while ((linea = r.readLine()) != null) {
+                sb.append(linea);
+            }
+            p.waitFor();
+            salida = sb.toString();
+        } catch (Exception ignored) {
+            return 1.0; // sin gdbus (u otro DE): comportamiento por defecto
+        }
+
+        // ('3072x1728@60.000', '3072x1728', '16:9', true, 1, [1536.0, 864.0, ...])
+        Matcher m = Pattern.compile(
+                "'(\\d+)x(\\d+)@[^']*',\\s*'\\d+x\\d+',\\s*'[^']*',\\s*true,"
+                        + "\\s*\\d+,\\s*\\[(\\d+\\.?\\d*),\\s*\\d+\\.?\\d*")
+                .matcher(salida);
+        double escala = 1.0;
+        while (m.find()) {
+            double fisica = Double.parseDouble(m.group(1));
+            double logica = Double.parseDouble(m.group(3));
+            if (logica > 0) {
+                escala = Math.max(escala, fisica / logica);
+            }
+        }
+        return escala;
+    }
+
+    /** Ajusta la ventana para que ocupe buena parte de la pantalla visible. */
+    private void ajustarTamanoAPantalla() {
+        Dimension pantalla = getToolkit().getScreenSize();
+        int ancho = (int) Math.max(1000, Math.min(pantalla.width * 0.90, pantalla.width));
+        int alto = (int) Math.max(640, Math.min(pantalla.height * 0.88, pantalla.height));
+        setSize(ancho, alto);
+        setLocationRelativeTo(null);
     }
 }
