@@ -205,7 +205,7 @@ siguiente. Está dicho en el diseño y es el primer punto de trabajo futuro
 ("pipeline: las 5 etapas en paralelo y sus riesgos").
 
 **Código**: `src/cpu/CPU.java:119-130` (llamadas en línea, sin solapamiento);
-mencionar `docs/reporte_exposicion/presentacion_exposicion.pptx` diapositiva 34.
+mencionar `docs/reporte_exposicion/exposicion/presentacion_exposicion.pptx` diapositiva 34.
 
 ### P14. ¿Qué es exactamente un "ciclo" aquí?
 **R.** Una pasada completa de las 5 etapas, es decir, la ejecución de **una
@@ -493,7 +493,7 @@ resultado es comprobable, no quién lo escribió.
 
 **Código**: `compilar.sh`, `probar.sh`, `ejecutar_programas.sh`, `ventana.sh`
 en la raíz del proyecto; pasos, salidas reales y guion de la demo en pantalla:
-`docs/reporte_exposicion/demo_ejecucion.md`.
+`docs/reporte_exposicion/exposicion/demo_ejecucion.md`.
 
 ### P45. ¿Qué pasa si ejecuto la demo y algo falla?
 **R.** Hay respaldos: las capturas de la práctica están en

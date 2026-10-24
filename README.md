@@ -34,7 +34,8 @@ docs/
   programas/        explicacion de los programas
   pruebas/          planes de pruebas (unitarias, integracion, sistema)
   diagramas/        diagramas de clases (puml + png) y como regenerarlos
-  reporte_exposicion/  registro del reporte final y preparacion de la exposicion
+  reporte_exposicion/  reporte final (registro, prompts, reporte_final/) y
+    exposicion/    presentacion, guion, preguntas y demo de la exposicion
 salidas/             capturas de ejecucion (inicio y fin) de cada programa
 ```
 
@@ -136,4 +137,10 @@ Capturas inicio/fin: carpeta `salidas/`. Script: `./ejecutar_programas.sh`
 - `docs/programas/factorial_explicacion.md`
 - `docs/practica/practica.txt` y `docs/practica/reporte_final.txt` - la practica y sus requisitos
 - `docs/reporte_exposicion/registro_reporte_final.md` - todo lo acumulado para el reporte
-- `docs/reporte_exposicion/preparacion_exposicion.md` - preguntas y respuestas para exponer
+- `docs/reporte_exposicion/exposicion/preparacion_exposicion.md` - preguntas y respuestas para exponer
+- `docs/reporte_exposicion/exposicion/` - material de la exposicion:
+  `presentacion_exposicion.pptx` (35 diapositivas, se regenera con
+  `python3 docs/reporte_exposicion/exposicion/generar_presentacion.py`),
+  `guion_exposicion.md` (que decir en cada diapositiva),
+  `preguntas_exposicion.md` (45 preguntas con archivo:linea) y
+  `demo_ejecucion.md` (instrucciones, muestra real y guion de pantalla)

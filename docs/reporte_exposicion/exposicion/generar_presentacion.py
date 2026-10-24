@@ -4,14 +4,14 @@ Genera la presentacion de la exposicion a partir de la plantilla UV.
 
     plantilla : docs/practica/presentacion_plantilla.pptx   (obligatoria;
                 si no esta, se usa docs/practica/final/plantillas/...)
-    salida    : docs/reporte_exposicion/presentacion_exposicion.pptx
+    salida    : docs/reporte_exposicion/exposicion/presentacion_exposicion.pptx
 
 Uso (desde la raiz del proyecto):
-    python3 docs/reporte_exposicion/generar_presentacion.py
+    python3 docs/reporte_exposicion/exposicion/generar_presentacion.py
 
 La presentacion es de APOYO: pocas palabras por diapositiva, la explicacion
 la da el equipo. El guion de lo que hay que decir esta en
-docs/reporte_exposicion/guion_exposicion.md
+docs/reporte_exposicion/exposicion/guion_exposicion.md
 """
 
 import os
@@ -23,7 +23,8 @@ from pptx.enum.shapes import MSO_CONNECTOR, MSO_SHAPE
 from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
 from pptx.util import Emu, Pt
 
-RAIZ = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
+RAIZ = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                     "..", "..", ".."))
 
 # La plantilla obligatoria puede estar copiada en docs/practica/ o en su
 # ubicacion original del repositorio; se usa la primera que exista.
@@ -34,7 +35,8 @@ _PLANTILLAS = (
 )
 PLANTILLA = next((p for p in _PLANTILLAS if os.path.exists(p)), _PLANTILLAS[-1])
 
-SALIDA = os.path.join(RAIZ, "docs", "reporte_exposicion", "presentacion_exposicion.pptx")
+SALIDA = os.path.join(RAIZ, "docs", "reporte_exposicion", "exposicion",
+                      "presentacion_exposicion.pptx")
 IMG = os.path.join(RAIZ, "docs", "reporte_exposicion", "reporte_final", "imagenes")
 DIAG = os.path.join(RAIZ, "docs", "diagramas")
 

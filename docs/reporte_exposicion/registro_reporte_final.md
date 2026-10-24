@@ -107,7 +107,7 @@ Todo el material del reporte vive ahora en la documentación del proyecto
 |---|---|
 | `docs/reporte_exposicion/registro_reporte_final.md` (este archivo) | datos de portada, material de la introducción, tablas de evidencia, reflexiones y pendientes |
 | `docs/reporte_exposicion/prompts_usados.md` | los **13 prompts** completos de la sección "Uso de IA" (con autor, texto y resultado; el prompt de `DiscoDuro` se excluyó del reporte) |
-| `docs/reporte_exposicion/preparacion_exposicion.md` | explicación para exponer + preguntas probables del profesor |
+| `docs/reporte_exposicion/exposicion/preparacion_exposicion.md` | explicación para exponer + preguntas probables del profesor |
 | `docs/arquitectura.md`, `docs/instrucciones.md` | arquitectura y conjunto de instrucciones |
 | `docs/pruebas/plan_pruebas_*.md` | los 3 planes de pruebas |
 | `docs/programas/factorial_explicacion.md` | explicación línea por línea del factorial |

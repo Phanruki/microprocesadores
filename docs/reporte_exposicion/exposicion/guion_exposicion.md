@@ -6,11 +6,11 @@
 > diapositiva: **qué idea transmitir**, **palabras clave** para no perderse y
 > **dónde está eso en el código** por si el profesor pide verlo.
 >
-> Presentación: `docs/reporte_exposicion/presentacion_exposicion.pptx` (35 diapositivas)
-> Se regenera con: `python3 docs/reporte_exposicion/generar_presentacion.py`
-> Preguntas probables del profesor: `docs/reporte_exposicion/preguntas_exposicion.md`
+> Presentación: `docs/reporte_exposicion/exposicion/presentacion_exposicion.pptx` (35 diapositivas)
+> Se regenera con: `python3 docs/reporte_exposicion/exposicion/generar_presentacion.py`
+> Preguntas probables del profesor: `docs/reporte_exposicion/exposicion/preguntas_exposicion.md`
 > Cómo hacer la demo en vivo (pasos, salida real y qué decir en pantalla):
-> `docs/reporte_exposicion/demo_ejecucion.md`
+> `docs/reporte_exposicion/exposicion/demo_ejecucion.md`
 
 ## Cómo se reparten los 45 minutos
 
@@ -396,7 +396,7 @@ se dicen 3 en voz alta y las otras 3 quedan como referencia visual.
 
 **Palabras clave**: preguntas.
 
-**En el código**: `docs/reporte_exposicion/preguntas_exposicion.md`.
+**En el código**: `docs/reporte_exposicion/exposicion/preguntas_exposicion.md`.
 
 ---
 
