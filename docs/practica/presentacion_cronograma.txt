@@ -1,0 +1,7 @@
+orden por minutos
+1-5 Razones técnicas para seleccionar el microprocesador
+6-15 Arquitectura (PC, RAM, ROM, Memoria de instrucciones, Memoria de datos, Registros del procesador)
+16-30 ISA del procesador y pruebas técnicas
+30-45 códigos implementados y ejecutados
+45-55 preguntas del profesor (no incluir en presentacion, es el maestro preguntando y asi)
+
