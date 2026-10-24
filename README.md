@@ -67,6 +67,21 @@ Botones: `Ejecutar 1 ciclo`, `Ejecutar programa`, `Cargar en el PC`,
 Atajos de teclado: `Ctrl+Intro` ejecuta un ciclo y `Ctrl+Mayus+Intro`
 ejecuta todo el programa.
 
+### Pantallas HiDPI (alta densidad)
+
+La ventana se adapta sola: al arrancar se consulta la escala real del
+escritorio (GNOME/Wayland, via `gdbus`) y se fija `sun.java2d.uiScale` para
+que Java renderice a tamano logico. Sin esto, en paneles como 3072x1728 la
+ventana sale diminuta. Si aun asi se ve pequena o enorme (maquina "rara"),
+fuerza la escala a mano:
+
+```bash
+java -Dsun.java2d.uiScale=2 -cp out ui.Emulador   # escala 2x
+java -Dsun.java2d.uiScale=1 -cp out ui.Emulador   # escala 1x
+```
+
+Cambia el numero (1, 1.5, 2, 3...) segun tu monitor.
+
 ## Ejecutar un programa (modo texto)
 
 ```bash

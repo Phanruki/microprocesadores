@@ -22,27 +22,28 @@ import javax.swing.JButton;
 
 /**
  * Paleta y utilidades de estilo para el tema oscuro de la ventana del emulador
- * (estilo editor de codigo, base negra). No contiene logica de negocio: sólo
+ * (estilo editor de codigo, base negra). No contiene logica de negocio: solo
  * apariencia.
  */
 final class TemaOscuro {
 
     // --- Paleta (inspirada en GitHub Dark / VS Code) ---
-    static final Color BASE      = new Color(0x0D1117); // fondo general (casi negro)
-    static final Color PANEL     = new Color(0x161B22); // paneles y contenedores
-    static final Color AREA      = new Color(0x0B0F14); // fondos de texto (mas oscuros)
-    static final Color BOTON     = new Color(0x21262D); // cara de botones
-    static final Color BOTON_HOV = new Color(0x30363D); // hover neutro
-    static final Color BORDE     = new Color(0x30363D); // bordes y divisores
-    static final Color TEXTO     = new Color(0xC9D1D9); // texto principal
-    static final Color TEXTO_DIM = new Color(0x8B949E); // texto secundario
-    static final Color TITULO    = new Color(0x58A6FF); // titulos de panel (azul)
-    static final Color VERDE     = new Color(0x238636); // acciones "Ejecutar"
-    static final Color VERDE_HOV = new Color(0x2EA043);
-    static final Color VERDE_REPOSO = new Color(0x1A2E22); // verde tenue en reposo
-    static final Color VERDE_BORDE  = new Color(0x2EA043); // borde verde para acciones
-    static final Color SELECCION = new Color(0x264F78); // seleccion de texto
-    static final Color OK        = new Color(0x3FB950); // barra de estado
+    static final Color BASE        = new Color(0x0D1117); // fondo general (casi negro)
+    static final Color PANEL       = new Color(0x161B22); // paneles y contenedores
+    static final Color AREA        = new Color(0x0B0F14); // fondos de texto (mas oscuros)
+    static final Color BOTON       = new Color(0x2D333B); // cara de botones (visible)
+    static final Color BOTON_BORDE = new Color(0x5A646E); // borde claro de botones
+    static final Color TEXTO_BOTON = Color.BLACK;        // texto de botones (negro)
+    static final Color BOTON_HOV   = new Color(0x3D444D); // hover neutro
+    static final Color BORDE       = new Color(0x30363D); // bordes y divisores
+    static final Color TEXTO       = new Color(0xC9D1D9); // texto principal
+    static final Color TEXTO_DIM   = new Color(0x8B949E); // texto secundario
+    static final Color TITULO      = new Color(0x58A6FF); // titulos de panel (azul)
+    static final Color VERDE       = new Color(0x238636); // acciones "Ejecutar" (fondo)
+    static final Color VERDE_HOV   = new Color(0x2EA043);
+    static final Color VERDE_BORDE = new Color(0x3FB950); // borde verde para acciones
+    static final Color SELECCION   = new Color(0x264F78); // seleccion de texto
+    static final Color OK          = new Color(0x3FB950); // barra de estado
 
     private TemaOscuro() { }
 
@@ -94,30 +95,33 @@ final class TemaOscuro {
         return new CompoundBorder(new EmptyBorder(6, 6, 6, 6), titulo(texto));
     }
 
-    /** Boton plano oscuro; si se pasa un color de acento, es una accion "principal". */
+    /**
+     * Boton plano. Si "acento" no es nulo es una accion principal (verde).
+     * Todos los colores del boton se declaran en linea para que la clase compile
+     * aunque la paleta de arriba cambie: no depende de ningun campo de color.
+     */
     static JButton boton(String texto, java.awt.event.ActionListener accion, Color acento) {
-        JButton b = new JButton(texto);
         boolean principal = (acento != null);
-        b.setFont(fuente(12f, Font.PLAIN));
-        b.setForeground(principal ? Color.WHITE : TEXTO);
-        b.setBackground(principal ? VERDE_REPOSO : BOTON);
+        final Color fondoRep   = principal ? new Color(0x238636) : new Color(0x2D333B);
+        final Color fondoHover = principal ? new Color(0x2EA043) : new Color(0x3D444D);
+        final Color borde      = principal ? new Color(0x3FB950) : new Color(0x5A646E);
+        final Color txt        = Color.BLACK; // texto de botones en negro
+
+        JButton b = new JButton(texto);
+        b.setFont(fuente(12f, principal ? Font.BOLD : Font.PLAIN));
+        b.setForeground(txt);
+        b.setBackground(fondoRep);
         b.setOpaque(true);
-        b.setBorder(new CompoundBorder(
-                new LineBorder(principal ? VERDE_BORDE : BORDE),
+        b.setBorder(new CompoundBorder(new LineBorder(borde),
                 new EmptyBorder(7, 14, 7, 14)));
         b.setFocusPainted(false);
         b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         b.setAlignmentX(JButton.LEFT_ALIGNMENT);
         b.setMaximumSize(new Dimension(Integer.MAX_VALUE, 34));
         b.addActionListener(accion);
-        final Color hover = principal ? acento : BOTON_HOV;
         b.addMouseListener(new MouseAdapter() {
-            @Override public void mouseEntered(MouseEvent e) {
-                b.setBackground(hover);
-            }
-            @Override public void mouseExited(MouseEvent e) {
-                b.setBackground(principal ? VERDE_REPOSO : BOTON);
-            }
+            @Override public void mouseEntered(MouseEvent e) { b.setBackground(fondoHover); }
+            @Override public void mouseExited(MouseEvent e)  { b.setBackground(fondoRep); }
         });
         return b;
     }
