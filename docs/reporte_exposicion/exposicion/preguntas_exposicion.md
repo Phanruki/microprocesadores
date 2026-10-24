@@ -8,6 +8,10 @@
 >
 > Al final hay un **mapa rápido del código** y recetas para encontrar cosas
 > con una sola orden de terminal.
+>
+> Si te piden **entrar a revisar un archivo en concreto**, lleva a mano
+> `docs/reporte_exposicion/exposicion/codigo_revisar.md`: los 12 archivos
+> principales, la línea exacta de cada cosa y cómo abrirlos sin perderte.
 
 ---
 

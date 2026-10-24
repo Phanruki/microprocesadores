@@ -6,6 +6,7 @@
 >
 > Uso general del proyecto (estructura, opciones, programas): `README.md`.
 > Preguntas del profesor con líneas de código: `preguntas_exposicion.md`.
+> Archivos de código para revisar en vivo: `codigo_revisar.md`.
 
 ---
 

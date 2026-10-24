@@ -142,5 +142,7 @@ Capturas inicio/fin: carpeta `salidas/`. Script: `./ejecutar_programas.sh`
   `presentacion_exposicion.pptx` (35 diapositivas, se regenera con
   `python3 docs/reporte_exposicion/exposicion/generar_presentacion.py`),
   `guion_exposicion.md` (que decir en cada diapositiva),
-  `preguntas_exposicion.md` (45 preguntas con archivo:linea) y
-  `demo_ejecucion.md` (instrucciones, muestra real y guion de pantalla)
+  `preguntas_exposicion.md` (45 preguntas con archivo:linea),
+  `demo_ejecucion.md` (instrucciones, muestra real y guion de pantalla) y
+  `codigo_revisar.md` (archivos de codigo relevantes con su linea exacta,
+  por si el profesor pide entrar a revisar uno)

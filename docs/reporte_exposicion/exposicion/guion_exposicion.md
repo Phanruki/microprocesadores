@@ -11,6 +11,8 @@
 > Preguntas probables del profesor: `docs/reporte_exposicion/exposicion/preguntas_exposicion.md`
 > Cómo hacer la demo en vivo (pasos, salida real y qué decir en pantalla):
 > `docs/reporte_exposicion/exposicion/demo_ejecucion.md`
+> Archivos de código para revisar en vivo (rutas, líneas y comandos):
+> `docs/reporte_exposicion/exposicion/codigo_revisar.md`
 
 ## Cómo se reparten los 45 minutos
 
